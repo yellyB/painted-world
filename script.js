@@ -1,5 +1,6 @@
 const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext("2d");
+const brushSelector = document.getElementById("brushSelector");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -142,8 +143,17 @@ window.addEventListener("mousemove", function (e) {
   if (!isDrawing) return;
 
   for (let i = 0; i < 3; i++) {
-    const waterColorBrush = new WaterColorBrush(e.x, e.y);
-    waterColorBrush.update();
+    let brush;
+    switch (brushSelector.value) {
+      case "WaterColorBrush":
+        brush = new WaterColorBrush(e.x, e.y);
+        break;
+      case "ConvexBrush":
+        brush = new ConvexBrush(e.x, e.y);
+        break;
+    }
+
+    brush.update();
   }
 });
 
