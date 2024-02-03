@@ -4,8 +4,14 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+let isDrawing = false;
+
+ctx.lineWidth = 0.1;
+ctx.globalCompositeOperation = "lighten";
+// ctx.globalCompositeOperation = "destination-over";
+
 // const 로 따로 선언된 변수들은 추후에 입력 값으로 받을 것.
-class Root {
+class WaterColorBrush {
   constructor(x, y) {
     this.x = x;
     this.y = y;
@@ -37,7 +43,7 @@ class Root {
     if (this.lightness < 90) {
       this.lightness += 1;
     }
-
+    //
     if (this.size < this.maxSize) {
       ctx.beginPath(); // 새로운 경로 시작
       ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); // 원 그리기. (x, y)는 중심 좌표, size는 반지름
@@ -50,6 +56,17 @@ class Root {
 }
 
 window.addEventListener("mousemove", function (e) {
-  const root = new Root(e.x, e.y);
-  root.update();
+  if (!isDrawing) return;
+
+  for (let i = 0; i < 3; i++) {
+    const waterColorBrush = new WaterColorBrush(e.x, e.y);
+    waterColorBrush.update();
+  }
+});
+
+window.addEventListener("mousedown", function (e) {
+  isDrawing = true;
+});
+window.addEventListener("mouseup", function () {
+  isDrawing = false;
 });
