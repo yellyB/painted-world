@@ -42,6 +42,11 @@ class WaterColorBrush {
     }
     //
     if (this.size < this.maxSize) {
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+      ctx.shadowBlur = 0;
+      // ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+
       ctx.beginPath(); // 새로운 경로 시작
       ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); // 원 그리기. (x, y)는 중심 좌표, size는 반지름
 
