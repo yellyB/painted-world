@@ -173,6 +173,8 @@ class WaterColorBrush {
     this.speedX = Math.random() * (moistureLevel * 2) - moistureLevel;
     this.speedY = Math.random() * (moistureLevel * 2) - moistureLevel;
 
+    this.colorLightnessLevel = 50;
+    this.colorSaturationLevel = 100;
     this.color = color;
 
     this.time = 0; // 물감이 퍼지고 있는 시간 저장한다.
@@ -181,6 +183,10 @@ class WaterColorBrush {
   }
   update() {
     this.time++;
+    this.size += 0.07;
+    this.colorLightnessLevel += 0.4; //  todo: 퍼지는 시간 비례해서(백분율) 더해주는걸로 수정하기
+    this.colorSaturationLevel -= 0.4;
+
     if (this.time > this.maxSpeadTime) {
       this.isFading = true;
       return;
@@ -190,7 +196,9 @@ class WaterColorBrush {
     this.y += this.speedY;
   }
   draw() {
-    ctx.fillStyle = this.color;
+    // ctx.fillStyle = this.color;
+    ctx.fillStyle = `hsl(10,${this.colorSaturationLevel}%,${this.colorLightnessLevel}%)`; // 색상, 채도, 명도
+
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     ctx.fill();
@@ -199,22 +207,24 @@ class WaterColorBrush {
 
 const handleCircles = () => {
   for (let i = 0; i < circlesArray.length; i++) {
-    circlesArray[i].update();
-    circlesArray[i].draw();
+    const cicleI = circlesArray[i];
+    cicleI.update();
+    cicleI.draw();
 
     // 이미 그려진 궤적과 합치기 위해서 그려진 점들을 연결한다.
     for (let j = i; j < circlesArray.length; j++) {
+      const cicleJ = circlesArray[j];
       // 피타고라스 이용해서 점 간 거리를 구하기. (기울기)
-      const dx = circlesArray[i].x - circlesArray[j].x;
-      const dy = circlesArray[i].y - circlesArray[j].y;
+      const dx = cicleI.x - cicleJ.x;
+      const dy = cicleI.y - cicleJ.y;
       const distance = Math.sqrt(dx * dx + dy + dy);
 
       if (distance < 100) {
         ctx.beginPath();
-        ctx.strokeStyle = circlesArray[i].color;
-        ctx.lineWidth = circlesArray[i].size / 100; // 점 사이를 이어주는 선 굵기. 나눠주는 수가 커지면 더 정교해짐
-        ctx.moveTo(circlesArray[i].x, circlesArray[i].y);
-        ctx.lineTo(circlesArray[j].x, circlesArray[j].y);
+        ctx.strokeStyle = `hsl(10,${cicleI.colorSaturationLevel}%,${cicleI.colorLightnessLevel}%)`; //cicleI.color;
+        ctx.lineWidth = cicleI.size / 10; // 점 사이를 이어주는 선 굵기. 나눠주는 수가 커지면 더 정교해짐
+        ctx.moveTo(cicleI.x, cicleI.y);
+        ctx.lineTo(cicleJ.x, cicleJ.y);
         ctx.stroke();
       }
     }
