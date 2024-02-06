@@ -2,6 +2,11 @@ const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext("2d");
 const brushSelector = document.getElementById("brushSelector");
 
+const moistureLevelElement = document.querySelector(".moistureLevel");
+const brushSizeElement = document.querySelector(".brushSize");
+
+const colorPicker = document.getElementById("colorPicker");
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
@@ -17,6 +22,12 @@ window.addEventListener("resize", () => {
 const mouse = {
   x: undefined,
   y: undefined,
+};
+
+const selectedColor = {
+  h: 0,
+  s: undefined,
+  l: undefined,
 };
 
 // const 로 따로 선언된 변수들은 추후에 입력 값으로 받을 것.
@@ -158,12 +169,13 @@ class ConvexBrush {
 }
 
 class WaterColorBrush {
-  constructor(x, y) {
+  constructor(moistureLevel, brushSize, selectedColor) {
+    this.moistureLevel = moistureLevel; // 도화지가 촉촉한 정도. 높을수록 많이, 빠르게 퍼짐
+    this.brushSize = brushSize;
+    this.color = selectedColor.h;
+
     // TODO : 입력 받기
     const maxSpeadTime = 200;
-    const moistureLevel = 0.5; // 도화지가 촉촉한 정도. 높을수록 많이, 빠르게 퍼짐
-    const color = "darkblue";
-    const brushSize = 10;
 
     this.x = mouse.x;
     this.y = mouse.y;
@@ -175,7 +187,6 @@ class WaterColorBrush {
 
     this.colorLightnessLevel = 50;
     this.colorSaturationLevel = 100;
-    this.color = color;
 
     this.time = 0; // 물감이 퍼지고 있는 시간 저장한다.
     this.maxSpeadTime = maxSpeadTime; // 물감 퍼지는 최대 시간(=범윔. 시간이 크면 그만큼 많이 퍼지게 되니깐 동일한 의미)
@@ -183,7 +194,7 @@ class WaterColorBrush {
   }
   update() {
     this.time++;
-    this.size += 0.07;
+    this.size += 0.1;
     this.colorLightnessLevel += 0.4; //  todo: 퍼지는 시간 비례해서(백분율) 더해주는걸로 수정하기
     this.colorSaturationLevel -= 0.4;
 
@@ -196,8 +207,7 @@ class WaterColorBrush {
     this.y += this.speedY;
   }
   draw() {
-    // ctx.fillStyle = this.color;
-    ctx.fillStyle = `hsl(10,${this.colorSaturationLevel}%,${this.colorLightnessLevel}%)`; // 색상, 채도, 명도
+    ctx.fillStyle = `hsl(${this.color},${this.colorSaturationLevel}%,${this.colorLightnessLevel}%)`; // 색상, 채도, 명도
 
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -212,22 +222,22 @@ const handleCircles = () => {
     cicleI.draw();
 
     // 이미 그려진 궤적과 합치기 위해서 그려진 점들을 연결한다.
-    for (let j = i; j < circlesArray.length; j++) {
-      const cicleJ = circlesArray[j];
-      // 피타고라스 이용해서 점 간 거리를 구하기. (기울기)
-      const dx = cicleI.x - cicleJ.x;
-      const dy = cicleI.y - cicleJ.y;
-      const distance = Math.sqrt(dx * dx + dy + dy);
+    // for (let j = i; j < circlesArray.length; j++) {
+    //   const cicleJ = circlesArray[j];
+    //   // 피타고라스 이용해서 점 간 거리를 구하기. (기울기)
+    //   const dx = cicleI.x - cicleJ.x;
+    //   const dy = cicleI.y - cicleJ.y;
+    //   const distance = Math.sqrt(dx * dx + dy + dy);
 
-      if (distance < 100) {
-        ctx.beginPath();
-        ctx.strokeStyle = `hsl(10,${cicleI.colorSaturationLevel}%,${cicleI.colorLightnessLevel}%)`; //cicleI.color;
-        ctx.lineWidth = cicleI.size / 10; // 점 사이를 이어주는 선 굵기. 나눠주는 수가 커지면 더 정교해짐
-        ctx.moveTo(cicleI.x, cicleI.y);
-        ctx.lineTo(cicleJ.x, cicleJ.y);
-        ctx.stroke();
-      }
-    }
+    //   if (distance < 100) {
+    //     ctx.beginPath();
+    //     ctx.strokeStyle = `hsl(${cicleI.color},${cicleI.colorSaturationLevel}%,${cicleI.colorLightnessLevel}%)`; //cicleI.color;
+    //     ctx.lineWidth = cicleI.size / 10; // 점 사이를 이어주는 선 굵기. 나눠주는 수가 커지면 더 정교해짐
+    //     ctx.moveTo(cicleI.x, cicleI.y);
+    //     ctx.lineTo(cicleJ.x, cicleJ.y);
+    //     ctx.stroke();
+    //   }
+    // }
 
     // 원이 흐려지고 있는 중이라면, 원을 아예 제거하기
     if (circlesArray[i].isFading) {
@@ -252,25 +262,28 @@ animate();
 
 const drawCircles = () => {
   for (let i = 0; i < 2; i++) {
-    circlesArray.push(new WaterColorBrush());
+    circlesArray.push(
+      new WaterColorBrush(
+        Number(moistureLevelElement.value),
+        Number(brushSizeElement.value),
+        selectedColor
+      )
+    );
   }
 };
 
 window.addEventListener("mousemove", (e) => {
   if (!isDrawing) return;
 
-  const brushVoulumn = 1; // 브러쉬를 풍성하게. 높을수록 많은 양
+  const brushVoulumn = 5; // 브러쉬를 풍성하게. 높을수록 많은 양
 
   for (let i = 0; i < brushVoulumn; i++) {
     let brush;
     switch (brushSelector.value) {
       case "WaterColorBrush":
-        // brush = new WaterColorBrush(e.x, e.y);
-
         mouse.x = e.x;
         mouse.y = e.y;
         drawCircles();
-
         break;
       case "WaterColorBrush_Old":
         brush = new WaterColorBrush_Old(e.x, e.y);
@@ -319,3 +332,58 @@ brushSelector.addEventListener("change", () => {
       break;
   }
 });
+
+function updateColor() {
+  const color = colorPicker.value;
+  const hslColor = rgbToHsl(hexToRgb(color));
+
+  selectedColor.h = hslColor[0];
+  selectedColor.s = hslColor[1];
+  selectedColor.l = hslColor[2];
+}
+
+colorPicker.addEventListener("change", () => updateColor());
+
+function rgbToHsl(rgb) {
+  const r = rgb[0] / 255;
+  const g = rgb[1] / 255;
+  const b = rgb[2] / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h,
+    s,
+    l = (max + min) / 2;
+
+  if (max == min) {
+    h = s = 0; // grayscale
+  } else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+
+    switch (max) {
+      case r:
+        h = (g - b) / d + (g < b ? 6 : 0);
+        break;
+      case g:
+        h = (b - r) / d + 2;
+        break;
+      case b:
+        h = (r - g) / d + 4;
+        break;
+    }
+
+    h /= 6;
+  }
+
+  return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
+}
+
+// HEX to RGB 변환 함수
+function hexToRgb(hex) {
+  return [
+    parseInt(hex.substring(1, 3), 16),
+    parseInt(hex.substring(3, 5), 16),
+    parseInt(hex.substring(5, 7), 16),
+  ];
+}

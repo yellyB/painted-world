@@ -8,15 +8,31 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <select id="brushSelector">
-      <option value="WaterColorBrush">WaterColorBrush</option>
-      <option value="WaterColorBrush_Old">WaterColorBrush_Old</option>
-      <option value="ConvexBrush">ConvexBrush</option>
-    </select>
+    <div class="controller">
+      select brush:<select id="brushSelector">
+        <option value="WaterColorBrush">WaterColorBrush</option>
+        <option value="WaterColorBrush_Old">WaterColorBrush_Old</option>
+        <option value="ConvexBrush">ConvexBrush</option>
+      </select>
+
+      size:<input
+        type="number"
+        class="brushSize"
+        placeholder="brush size"
+        value="10"
+      />
+      moistureLevel:<input
+        type="number"
+        class="moistureLevel"
+        placeholder="moistureLevel"
+        value="0.5"
+      />
+      color:<input type="color" id="colorPicker" value="#FF0000" />
+    </div>
 
     <canvas id="canvas1" class="water-color-brush"></canvas>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
     <!-- <script src="script2.js"></script> -->
   </body>
 </html>
