@@ -10,9 +10,11 @@
   <body>
     <div class="controller">
       select brush:<select id="brushSelector">
-        <option value="WaterColorBrush">WaterColorBrush</option>
-        <option value="WaterColorBrush_Old">WaterColorBrush_Old</option>
-        <option value="ConvexBrush">ConvexBrush</option>
+        <option value="WaterColorBrush" selected>WaterColorBrush</option>
+        <option value="WaterColorBrush_Old" disabled>
+          WaterColorBrush_Old
+        </option>
+        <option value="ConvexBrush" disabled>ConvexBrush</option>
       </select>
 
       size:<input
@@ -33,6 +35,5 @@
     <canvas id="canvas1" class="water-color-brush"></canvas>
 
     <script type="module" src="script.js"></script>
-    <!-- <script src="script2.js"></script> -->
   </body>
 </html>
