@@ -139,7 +139,7 @@ export class WaterDropBrush {
     this.y = mouse.y;
     this.size = Math.random() * 60 + 10;
     this.image = new Image();
-    this.image.src = "/images/water_drop.png";
+    this.image.src = "images/water_drop.png";
     this.drawInterval = 100;
     this.drawTimer = 0;
   }
