@@ -1,4 +1,4 @@
-import { ConvexBrush, WaterColorBrush, WaterDropBrush } from "./brush.js";
+import { ConvexBrush, WaterColorBrush, WaterDropBrush, BugBrush } from "./brush.js";
 import { rgbToHsl, hexToRgb, clearCanvas } from "./utils.js";
 import { drawCircles } from "./brushUtils.js";
 import { brushType } from "./type.js";
@@ -44,6 +44,14 @@ const animate = () => {
   if (brushSelector.value === brushType.WaterColorBrush) {
     drawCircles(ctx, circlesArray);
   }
+  if (brushSelector.value === brushType.BugBrush) {
+    clearCanvas({ ctx, canvas });
+    circlesArray.forEach(i => i.update());
+    circlesArray.forEach(i => i.draw(ctx));
+    requestAnimationFrame(animate);
+    return
+  }
+  if (brushSelector.value !== brushType.WaterColorBrush) return;
 
   requestAnimationFrame(animate);
 };
@@ -74,6 +82,8 @@ window.addEventListener("mousemove", (e) => {
     for (let i = 0; i < brushVoulumn; i++) {
       handleCircles();
     }
+  } else if (brushSelector.value === brushType.BugBrush) {
+    circlesArray.push(new BugBrush({ x: e.x, y: e.y, selectedColor }));
   }
 });
 
