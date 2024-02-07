@@ -2,7 +2,7 @@ export const drawCircles = (ctx, circlesArray) => {
   for (let i = 0; i < circlesArray.length; i++) {
     const cicleI = circlesArray[i];
     cicleI.update();
-    cicleI.draw(ctx);
+    cicleI.draw();
 
     // 이미 그려진 궤적과 합치기 위해서 그려진 점들을 연결한다.
     // for (let j = i; j < circlesArray.length; j++) {

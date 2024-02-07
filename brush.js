@@ -1,60 +1,5 @@
 // const 로 따로 선언된 변수들은 추후에 입력 값으로 받을 것.
 
-export class WaterColorBrush_Old {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-
-    const moistureLevel = 2; // 도화지가 촉촉한 정도. 높을수록 많이, 빠르게 퍼짐
-    this.speedX = Math.random() * (moistureLevel * 2) - moistureLevel;
-    this.speedY = Math.random() * (moistureLevel * 2) - moistureLevel;
-
-    const finalMinSize = 5; // 다 퍼졌을때, 마지막 생성된 원의 최소 크기
-    const finalMaxSize = 12;
-    this.maxSize = Math.random() * (finalMaxSize - finalMinSize) + finalMinSize; // 이 값이 클수록 완전히 퍼지는데 걸리는 시간은 오래 걸린다.
-    this.size = Math.random() * 1 + 2;
-
-    this.velocitySize = Math.random() * 0.2 + 0.05; // 최대 사이즈에 도달할 때까지 랜덤한 속도로 퍼지기 위함
-    this.velocityAngleX = Math.random() * 0.6 - 0.3;
-    this.angleX = Math.random() * 6.2;
-    this.velocityAngleY = Math.random() * 0.6 - 0.3;
-    this.angleY = Math.random() * 6.2;
-
-    this.lightness = 10;
-  }
-  update(ctx) {
-    this.x += this.speedX + Math.sin(this.angleX);
-    this.y += this.speedY + Math.sin(this.angleY);
-
-    this.size += this.velocitySize;
-    this.angleX += this.velocityAngleX;
-    this.angleY += this.velocityAngleY;
-
-    if (this.lightness < 90) {
-      this.lightness += 1;
-    }
-
-    if (this.size < this.maxSize) {
-      //   ctx.shadowOffsetX = 0;
-      //   ctx.shadowOffsetY = 0;
-      //   ctx.shadowBlur = 0;
-      //   // ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-
-      ctx.beginPath(); // 새로운 경로 시작
-      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); // 원 그리기. (x, y)는 중심 좌표, size는 반지름
-
-      ctx.lineWidth = 0.1;
-      ctx.globalCompositeOperation = "lighten";
-      // ctx.globalCompositeOperation = "destination-over";
-
-      ctx.fillStyle = `hsl(140,100%,${this.lightness}%)`; // 색상, 채도, 명도
-      ctx.fill(); // 설정된 색상으로 원의 내부를 채우기
-      ctx.stroke(); // 원의 테두리
-      //   requestAnimationFrame(() => this.update());
-    }
-  }
-}
-
 export class ConvexBrush {
   constructor(x, y) {
     this.x = x;
@@ -138,7 +83,9 @@ export class ConvexBrush {
 }
 
 export class WaterColorBrush {
-  constructor({ mouse, moistureLevel, brushSize, selectedColor }) {
+  constructor({ ctx, mouse, moistureLevel, brushSize, selectedColor }) {
+    // todo: 입력 받은 값은 따로 외부에 저장해서 브러쉬끼리 공유하기?
+    this.ctx = ctx;
     this.moistureLevel = moistureLevel; // 도화지가 촉촉한 정도. 높을수록 많이, 빠르게 퍼짐
     this.brushSize = brushSize;
     this.color = selectedColor.h;
@@ -175,11 +122,66 @@ export class WaterColorBrush {
     this.x += this.speedX;
     this.y += this.speedY;
   }
-  draw(ctx) {
-    ctx.fillStyle = `hsl(${this.color},${this.colorSaturationLevel}%,${this.colorLightnessLevel}%)`; // 색상, 채도, 명도
+  draw() {
+    this.ctx.fillStyle = `hsl(${this.color},${this.colorSaturationLevel}%,${this.colorLightnessLevel}%)`; // 색상, 채도, 명도
 
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fill();
+    this.ctx.beginPath();
+    this.ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    this.ctx.fill();
+  }
+}
+
+export class WaterDropBrush {
+  // todo: 드래그할때도 그려지게? -> scatter 값 부여
+  constructor({ ctx, mouse }) {
+    this.ctx = ctx;
+    this.x = mouse.x;
+    this.y = mouse.y;
+    this.size = Math.random() * 60 + 10;
+    this.image = new Image();
+    this.image.src = "/images/water_drop.png";
+    this.drawInterval = 100;
+    this.drawTimer = 0;
+  }
+  update() {
+    this.x += Math.random() * 100 - 50;
+    this.y += Math.random() * 100 - 50;
+    this.drawTimer += 1;
+  }
+  draw() {
+    this.ctx.drawImage(
+      this.image,
+      this.x - this.size * 0.2,
+      this.y - 30 - this.size * 0.3,
+      this.size,
+      this.size
+    );
+    this.drawTimer = 0;
+  }
+}
+
+export class WaterDropBrush1 {
+  constructor({ mouse }) {
+    this.x = mouse.x;
+    this.y = mouse.y;
+
+    this.size = Math.random() * 1 + 2;
+    // this.angle = Math.random() * 360;
+  }
+  update() {
+    this.size += this.velocitySize;
+  }
+  draw() {
+    // ctx.save();
+    // ctx.translate(this.x, this.y);
+    // ctx.rotate(this.angle);
+    this.ctx.drawImage(
+      this.image,
+      this.x - this.size * 0.2,
+      this.y - 30 - this.size * 0.3,
+      this.size,
+      this.size
+    );
+    // ctx.restore();
   }
 }
