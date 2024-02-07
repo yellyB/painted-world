@@ -185,3 +185,60 @@ export class WaterDropBrush1 {
     // ctx.restore();
   }
 }
+
+class Vector {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+  }
+  rotate(angle) {
+    return new Vector(
+      this.x * Math.cos(angle) - this.y * Math.sin(angle),
+      this.x * Math.sin(angle) + this.y * Math.cos(angle)
+    );
+  }
+  multiply(scalar) {
+    return new Vector(this.x * scalar, this.y * scalar);
+  }
+  subtract(vector) {
+    return new Vector(this.x - vector.x, this.y - vector.y);
+  }
+  add(vector) {
+    return new Vector(this.x + vector.x, this.y + vector.y);
+  }
+  magnitude() {
+    return Math.sqrt(this.x * this.x + this.y * this.y);
+  }
+  unit() {
+    return this.multiply(1 / this.magnitude());
+  }
+}
+
+export class BugBrush {
+  constructor({ x, y, selectedColor }) {
+    this.dst = new Vector(x, y);  // 벌레가 가야할 목적지
+    this.angle = Math.random() * Math.PI * 2;  // 랜덤한 각도로
+    this.pos = this.dst.subtract(this.dst.rotate(this.angle).unit().multiply(100));  // 거리를 두고 시작
+    this.velocity = this.dst.subtract(this.pos).multiply(0.01);  // 시작은 목적지로 이동
+    this.visible = true;  // 보이는지 여부
+    this.size = 2;
+    this.color = selectedColor.h;
+    this.colorLightnessLevel = 50;
+    this.colorSaturationLevel = 100;
+  }
+  update() {
+    this.pos = this.pos.add(this.velocity);
+    if (this.pos.subtract(this.dst).magnitude() < 5) {
+      this.visible = false;
+    }
+  }
+  draw(ctx) {
+    if (!this.visible) return;
+    ctx.save();
+    ctx.fillStyle = `hsl(${this.color},${this.colorSaturationLevel}%,${this.colorLightnessLevel}%)`;
+    ctx.beginPath();
+    ctx.arc(this.pos.x, this.pos.y, this.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+}
