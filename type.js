@@ -1,6 +1,6 @@
 export const brushType = {
   WaterColorBrush: "WaterColorBrush",
-  WaterDropBrush: "WaterDropBrush",
+  WaterDrop: "WaterDrop",
   ConvexBrush: "ConvexBrush",
   BugBrush: "BugBrush",
 };
