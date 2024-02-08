@@ -44,6 +44,7 @@ const selectedColor = {
 };
 
 const circlesArray = [];
+const bugBrushes = [];
 
 const animate = () => {
   if (brushSelector.value === brushType.WaterColorBrush) {
@@ -51,8 +52,8 @@ const animate = () => {
   }
   if (brushSelector.value === brushType.BugBrush) {
     clearCanvas({ ctx, canvas });
-    circlesArray.forEach((i) => i.update());
-    circlesArray.forEach((i) => i.draw(ctx));
+    bugBrushes.forEach(i => i.update());
+    bugBrushes.forEach(i => i.draw(ctx));
     requestAnimationFrame(animate);
     return;
   }
@@ -102,7 +103,7 @@ const handleMoveAction = (e) => {
       handleCircles();
     }
   } else if (brushSelector.value === brushType.BugBrush) {
-    circlesArray.push(new BugBrush({ x: e.x, y: e.y, selectedColor }));
+    bugBrushes.push(new BugBrush({ x: e.x, y: e.y, selectedColor }));
   }
 };
 
