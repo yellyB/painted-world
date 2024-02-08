@@ -4,9 +4,9 @@
   box-sizing: border-box;
 }
 #canvas1 {
-  position: absolute;
+  /* position: absolute; */
   width: 100%;
-  height: 100%;
+  height: calc(100% - 30px);
   top: 30px;
   border: 1px solid black;
 }
@@ -14,7 +14,7 @@
   /* background: black; */
   /* filter: blur(3px) contrast(10); */
 }
-#controller {
+.controller {
   position: absolute;
   height: 30px;
 }

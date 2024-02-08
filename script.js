@@ -1,4 +1,9 @@
-import { ConvexBrush, WaterColorBrush, WaterDropBrush, BugBrush } from "./brush.js";
+import {
+  ConvexBrush,
+  WaterColorBrush,
+  WaterDropBrush,
+  BugBrush,
+} from "./brush.js";
 import { rgbToHsl, hexToRgb, clearCanvas } from "./utils.js";
 import { drawCircles } from "./brushUtils.js";
 import { brushType } from "./type.js";
@@ -20,7 +25,7 @@ const colorPicker = document.getElementById("colorPicker");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let isDrawing = false;
+let isDragging = false;
 
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
@@ -46,10 +51,10 @@ const animate = () => {
   }
   if (brushSelector.value === brushType.BugBrush) {
     clearCanvas({ ctx, canvas });
-    circlesArray.forEach(i => i.update());
-    circlesArray.forEach(i => i.draw(ctx));
+    circlesArray.forEach((i) => i.update());
+    circlesArray.forEach((i) => i.draw(ctx));
     requestAnimationFrame(animate);
-    return
+    return;
   }
   if (brushSelector.value !== brushType.WaterColorBrush) return;
 
@@ -70,8 +75,22 @@ const handleCircles = () => {
   );
 };
 
-window.addEventListener("mousemove", (e) => {
-  if (!isDrawing) return;
+const handleClickAction = (e) => {
+  isDragging = true;
+
+  mouse.x = e.x;
+  mouse.y = e.y;
+
+  if (brushSelector.value === brushType.WaterColorBrush) {
+    handleCircles();
+  } else if (brushSelector.value === brushType.WaterDropBrush) {
+    const brush = new WaterDropBrush({ ctx, mouse });
+    brush.draw();
+  }
+};
+
+const handleMoveAction = (e) => {
+  if (!isDragging) return;
 
   mouse.x = e.x;
   mouse.y = e.y;
@@ -85,25 +104,29 @@ window.addEventListener("mousemove", (e) => {
   } else if (brushSelector.value === brushType.BugBrush) {
     circlesArray.push(new BugBrush({ x: e.x, y: e.y, selectedColor }));
   }
+};
+
+const handleReleaseAction = () => {
+  isDragging = false;
+};
+
+canvas.addEventListener("mousedown", (e) => handleClickAction(e));
+canvas.addEventListener("mousemove", (e) => handleMoveAction(e));
+canvas.addEventListener("mouseup", () => handleReleaseAction());
+
+canvas.addEventListener("touchstart", (e) => {
+  e.preventDefault();
+  e.x = e.changedTouches[0].pageX;
+  e.y = e.changedTouches[0].pageY;
+  handleClickAction(e);
 });
-
-window.addEventListener("mousedown", (e) => {
-  isDrawing = true;
-
-  mouse.x = e.x;
-  mouse.y = e.y;
-
-  if (brushSelector.value === brushType.WaterColorBrush) {
-    handleCircles();
-  } else if (brushSelector.value === brushType.WaterDropBrush) {
-    const brush = new WaterDropBrush({ ctx, mouse });
-    brush.draw();
-  }
+canvas.addEventListener("touchmove", (e) => {
+  e.preventDefault();
+  e.x = e.changedTouches[0].pageX;
+  e.y = e.changedTouches[0].pageY;
+  handleMoveAction(e);
 });
-
-window.addEventListener("mouseup", () => {
-  isDrawing = false;
-});
+canvas.addEventListener("touchend", () => handleReleaseAction());
 
 brushSelector.addEventListener("change", () => {
   clearCanvas({ ctx, canvas });
