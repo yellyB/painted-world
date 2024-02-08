@@ -35,9 +35,9 @@ export const drawWaterDrops = (ctx, list) => {
     list[i].update();
     list[i].draw();
 
-    // if (list[i].isTouchingGround()) {
-    //   list.splice(i, 1);
-    //   i--;
-    // }
+    if (list[i].isOutOfCanvas()) {
+      list.splice(i, 1);
+      i--;
+    }
   }
 };

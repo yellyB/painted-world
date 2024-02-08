@@ -42,6 +42,17 @@ const circlesArray = [];
 const bugBrushes = [];
 const waterDrops = [];
 
+// todo: 모든 브러시에 cursor 표현할 수 있도록 구조 변경
+const cursor = () => {
+  const waterDrop = new WaterDrop({
+    ctx,
+    mouse,
+    canvas,
+    size: 50,
+  });
+  waterDrop.draw();
+};
+
 const animate = () => {
   clearCanvas({ ctx, canvas });
 
@@ -56,6 +67,7 @@ const animate = () => {
   }
   if (brushSelector.value === brushType.WaterDrop) {
     drawWaterDrops(ctx, waterDrops);
+    cursor();
   }
 
   requestAnimationFrame(animate);
@@ -97,10 +109,10 @@ const handleClickAction = (e) => {
 };
 
 const handleMoveAction = (e) => {
-  if (!isDragging) return;
-
   mouse.x = e.x;
   mouse.y = e.y;
+
+  if (!isDragging) return;
 
   if (brushSelector.value === brushType.WaterColorBrush) {
     const brushVoulumn = 5; // 브러쉬를 풍성하게. 높을수록 많은 양

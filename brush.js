@@ -51,11 +51,11 @@ export class WaterDrop {
   // todo: 땅에 튕기는 바운스 여러번.
   // todo: 큰 구슬은 깨지기
   // todo: 떨어지는 궤적 남기기
-  constructor({ ctx, mouse, canvas }) {
+  constructor({ ctx, mouse, canvas, size }) {
     this.ctx = ctx;
     this.x = mouse.x;
     this.y = mouse.y;
-    this.size = Math.random() * 80 + 10;
+    this.size = size ? size : Math.random() * 80 + 10;
     this.canvas = canvas;
 
     this.image = new Image();
@@ -70,12 +70,12 @@ export class WaterDrop {
   switchDirection() {
     this.isDropping = !this.isDropping;
   }
-  checkIsOnGround() {
-    return this.y >= this.bottomCoordinates;
+  isOnGround() {
+    // NOTE: 이미지 배치가 안맞아서 마지막 이미지가 바닥 위치를 넘어가면 캔버스 바깥으로 넘어간 후 튕기게 되어버림. 때문에 size를 이용해 높이를 빼준다.
+    return this.y >= this.bottomCoordinates - this.size * 0.5;
   }
-  checkIsTouchingCeiling() {
-    // const res = this.y <= this.ceilingLimit;
-    // return res;
+  isOutOfCanvas() {
+    return this.y > this.bottomCoordinates + this.size * 1.5;
   }
   update() {
     // TODO: 추후 커서에 따라 미리보기 이미지 제공되면 정교하게 수정
@@ -85,17 +85,12 @@ export class WaterDrop {
     if (this.isDropping) {
       this.velocity += this.weight;
       this.y += Math.pow(this.velocity, this.accelLevel);
+      if (this.isOnGround()) {
+        this.switchDirection();
+      }
     } else {
       this.velocity -= this.weight;
       this.y -= this.velocity;
-    }
-
-    if (this.checkIsOnGround()) {
-      this.isDropping = false;
-      this.switchDirection();
-    }
-    if (this.checkIsOnGround()) {
-      this.switchDirection();
     }
   }
   draw() {
