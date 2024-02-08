@@ -1,87 +1,3 @@
-// const 로 따로 선언된 변수들은 추후에 입력 값으로 받을 것.
-
-export class ConvexBrush {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-
-    const moistureLevel = 2; // 도화지가 촉촉한 정도. 높을수록 많이, 빠르게 퍼짐
-    this.speedX = Math.random() * (moistureLevel * 2) - moistureLevel;
-    this.speedY = Math.random() * (moistureLevel * 2) - moistureLevel;
-
-    const finalMinSize = 20; // 다 퍼졌을때, 마지막 생성된 원의 최소 크기
-    const finalMaxSize = 12;
-    this.maxSize = Math.random() * (finalMaxSize - finalMinSize) + finalMinSize; // 이 값이 클수록 완전히 퍼지는데 걸리는 시간은 오래 걸린다.
-    this.size = Math.random() * 1 + 2;
-
-    this.velocitySize = Math.random() * 0.2 + 0.5; // 최대 사이즈에 도달할 때까지 랜덤한 속도로 퍼지기 위함
-    this.velocityAngleX = Math.random() * 0.6 - 0.3;
-    this.angleX = Math.random() * 6.2;
-    this.velocityAngleY = Math.random() * 0.6 - 0.3;
-    this.angleY = Math.random() * 6.2;
-
-    this.angle = 0;
-    this.velocityAngle = Math.random() * 0.02 + 0.05;
-
-    this.lightness = 10;
-  }
-  update(ctx) {
-    this.x += this.speedX + Math.sin(this.angleX);
-    this.y += this.speedY + Math.sin(this.angleY);
-    this.size += this.velocitySize;
-    this.angleX += this.velocityAngleX;
-    this.angleY += this.velocityAngleY;
-    this.angle += this.velocityAngle;
-
-    if (this.lightness < 70) {
-      this.lightness += 1;
-    }
-
-    if (this.size < this.maxSize) {
-      const halfSize = this.size / 2;
-      const doubleSize = this.size * 2;
-      const tripleSize = this.size * 2;
-
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 10;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
-
-      // ctx.globalCompositeOperation = "lighten";
-      ctx.globalCompositeOperation = "destination-over";
-
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.rotate(this.angle);
-
-      ctx.fillStyle = `hsl(140,100%,${this.lightness}%)`; // 색상, 채도, 명도
-      ctx.fillRect(0 - halfSize, 0 - halfSize, this.size, this.size);
-
-      // ctx.strokeStyle = "#3c5186";
-      // ctx.lineWidth = 0.5;
-      // ctx.strokeRect(
-      //   0 - doubleSize / 2,
-      //   0 - doubleSize / 2,
-      //   doubleSize,
-      //   doubleSize
-      // );
-
-      // ctx.strokeStyle = "#ffffff";
-      // ctx.lineWidth = 0.1;
-      // ctx.strokeRect(
-      //   0 - tripleSize / 2,
-      //   0 - tripleSize / 2,
-      //   tripleSize,
-      //   tripleSize
-      // );
-
-      ctx.restore();
-
-      requestAnimationFrame(() => this.update());
-    }
-  }
-}
-
 export class WaterColorBrush {
   constructor({ ctx, mouse, moistureLevel, brushSize, selectedColor }) {
     // todo: 입력 받은 값은 따로 외부에 저장해서 브러쉬끼리 공유하기?
@@ -131,22 +47,56 @@ export class WaterColorBrush {
   }
 }
 
-export class WaterDropBrush {
-  // todo: 드래그할때도 그려지게? -> scatter 값 부여
-  constructor({ ctx, mouse }) {
+export class WaterDrop {
+  // todo: 땅에 튕기는 바운스 여러번.
+  // todo: 큰 구슬은 깨지기
+  // todo: 떨어지는 궤적 남기기
+  constructor({ ctx, mouse, canvas }) {
     this.ctx = ctx;
     this.x = mouse.x;
     this.y = mouse.y;
-    this.size = Math.random() * 60 + 10;
+    this.size = Math.random() * 80 + 10;
+    this.canvas = canvas;
+
     this.image = new Image();
     this.image.src = "images/water_drop.png";
-    this.drawInterval = 100;
-    this.drawTimer = 0;
+
+    this.bottomCoordinates = canvas.height;
+    this.velocity = 0;
+    this.accelLevel = 4; // // 가속도 조절 todo: 입력 받기
+    this.weight = this.size * 0.0005; // 사이즈에 따라 무게 결정
+    this.isDropping = true;
+  }
+  switchDirection() {
+    this.isDropping = !this.isDropping;
+  }
+  checkIsOnGround() {
+    return this.y >= this.bottomCoordinates;
+  }
+  checkIsTouchingCeiling() {
+    // const res = this.y <= this.ceilingLimit;
+    // return res;
   }
   update() {
-    this.x += Math.random() * 100 - 50;
-    this.y += Math.random() * 100 - 50;
-    this.drawTimer += 1;
+    // TODO: 추후 커서에 따라 미리보기 이미지 제공되면 정교하게 수정
+    // this.x += Math.random() * 100 - 50;
+    // this.y += Math.random() * 100 - 50;
+
+    if (this.isDropping) {
+      this.velocity += this.weight;
+      this.y += Math.pow(this.velocity, this.accelLevel);
+    } else {
+      this.velocity -= this.weight;
+      this.y -= this.velocity;
+    }
+
+    if (this.checkIsOnGround()) {
+      this.isDropping = false;
+      this.switchDirection();
+    }
+    if (this.checkIsOnGround()) {
+      this.switchDirection();
+    }
   }
   draw() {
     this.ctx.drawImage(
@@ -156,33 +106,6 @@ export class WaterDropBrush {
       this.size,
       this.size
     );
-    this.drawTimer = 0;
-  }
-}
-
-export class WaterDropBrush1 {
-  constructor({ mouse }) {
-    this.x = mouse.x;
-    this.y = mouse.y;
-
-    this.size = Math.random() * 1 + 2;
-    // this.angle = Math.random() * 360;
-  }
-  update() {
-    this.size += this.velocitySize;
-  }
-  draw() {
-    // ctx.save();
-    // ctx.translate(this.x, this.y);
-    // ctx.rotate(this.angle);
-    this.ctx.drawImage(
-      this.image,
-      this.x - this.size * 0.2,
-      this.y - 30 - this.size * 0.3,
-      this.size,
-      this.size
-    );
-    // ctx.restore();
   }
 }
 
@@ -216,11 +139,13 @@ class Vector {
 
 export class BugBrush {
   constructor({ x, y, selectedColor }) {
-    this.dst = new Vector(x, y);  // 벌레가 가야할 목적지
-    this.angle = Math.random() * Math.PI * 2;  // 랜덤한 각도로
-    this.pos = this.dst.subtract(this.dst.rotate(this.angle).unit().multiply(100));  // 거리를 두고 시작
-    this.velocity = this.dst.subtract(this.pos).multiply(0.01);  // 시작은 목적지로 이동
-    this.visible = true;  // 보이는지 여부
+    this.dst = new Vector(x, y); // 벌레가 가야할 목적지
+    this.angle = Math.random() * Math.PI * 2; // 랜덤한 각도로
+    this.pos = this.dst.subtract(
+      this.dst.rotate(this.angle).unit().multiply(100)
+    ); // 거리를 두고 시작
+    this.velocity = this.dst.subtract(this.pos).multiply(0.01); // 시작은 목적지로 이동
+    this.visible = true; // 보이는지 여부
     this.size = 2;
     this.color = selectedColor.h;
     this.colorLightnessLevel = 50;

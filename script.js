@@ -1,11 +1,6 @@
-import {
-  ConvexBrush,
-  WaterColorBrush,
-  WaterDropBrush,
-  BugBrush,
-} from "./brush.js";
+import { WaterColorBrush, WaterDrop, BugBrush } from "./brush.js";
 import { rgbToHsl, hexToRgb, clearCanvas } from "./utils.js";
-import { drawCircles } from "./brushUtils.js";
+import { drawCircles, drawWaterDrops } from "./brushUtils.js";
 import { brushType } from "./type.js";
 
 /**
@@ -44,19 +39,23 @@ const selectedColor = {
 };
 
 const circlesArray = [];
+const waterDrops = [];
 
 const animate = () => {
+  clearCanvas({ ctx, canvas });
+
   if (brushSelector.value === brushType.WaterColorBrush) {
     drawCircles(ctx, circlesArray);
   }
   if (brushSelector.value === brushType.BugBrush) {
-    clearCanvas({ ctx, canvas });
     circlesArray.forEach((i) => i.update());
     circlesArray.forEach((i) => i.draw(ctx));
     requestAnimationFrame(animate);
     return;
   }
-  if (brushSelector.value !== brushType.WaterColorBrush) return;
+  if (brushSelector.value === brushType.WaterDrop) {
+    drawWaterDrops(ctx, waterDrops);
+  }
 
   requestAnimationFrame(animate);
 };
@@ -83,9 +82,16 @@ const handleClickAction = (e) => {
 
   if (brushSelector.value === brushType.WaterColorBrush) {
     handleCircles();
-  } else if (brushSelector.value === brushType.WaterDropBrush) {
-    const brush = new WaterDropBrush({ ctx, mouse });
-    brush.draw();
+  } else if (brushSelector.value === brushType.WaterDrop) {
+    waterDrops.push(
+      new WaterDrop({
+        ctx,
+        mouse,
+        canvas,
+      })
+    );
+
+    // brush.draw();
   }
 };
 

@@ -1,8 +1,8 @@
 export const drawCircles = (ctx, circlesArray) => {
   for (let i = 0; i < circlesArray.length; i++) {
-    const cicleI = circlesArray[i];
-    cicleI.update();
-    cicleI.draw();
+    const circleI = circlesArray[i];
+    circleI.update();
+    circleI.draw();
 
     // 이미 그려진 궤적과 합치기 위해서 그려진 점들을 연결한다.
     // for (let j = i; j < circlesArray.length; j++) {
@@ -27,5 +27,17 @@ export const drawCircles = (ctx, circlesArray) => {
       circlesArray.splice(i, 1);
       i--;
     }
+  }
+};
+
+export const drawWaterDrops = (ctx, list) => {
+  for (let i = 0; i < list.length; i++) {
+    list[i].update();
+    list[i].draw();
+
+    // if (list[i].isTouchingGround()) {
+    //   list.splice(i, 1);
+    //   i--;
+    // }
   }
 };
