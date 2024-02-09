@@ -16,6 +16,7 @@ const moistureLevelElement = document.querySelector(".moistureLevel");
 const brushSizeElement = document.querySelector(".brushSize");
 
 const colorPicker = document.getElementById("colorPicker");
+const brushSelector = document.getElementById("brushSelector");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -42,32 +43,32 @@ const circlesArray = [];
 const bugBrushes = [];
 const waterDrops = [];
 
-// todo: 모든 브러시에 cursor 표현할 수 있도록 구조 변경
-const cursor = () => {
-  const waterDrop = new WaterDrop({
-    ctx,
-    mouse,
-    canvas,
-    size: 50,
-  });
-  waterDrop.draw();
-};
-
 const animate = () => {
   clearCanvas({ ctx, canvas });
 
   if (brushSelector.value === brushType.WaterColorBrush) {
     drawCircles(ctx, circlesArray);
+    new WaterColorBrush({
+      ctx,
+      mouse,
+      moistureLevel: Number(moistureLevelElement.value),
+      brushSize: Number(brushSizeElement.value),
+      selectedColor,
+    }).cursor(Number(brushSizeElement.value) * 1.5);
   }
   if (brushSelector.value === brushType.BugBrush) {
-    bugBrushes.forEach(i => i.update());
-    bugBrushes.forEach(i => i.draw(ctx));
+    bugBrushes.forEach((i) => i.update());
+    bugBrushes.forEach((i) => i.draw(ctx));
     requestAnimationFrame(animate);
     return;
   }
   if (brushSelector.value === brushType.WaterDrop) {
     drawWaterDrops(ctx, waterDrops);
-    cursor();
+    new WaterDrop({
+      ctx,
+      mouse,
+      canvas,
+    }).cursor(40);
   }
 
   requestAnimationFrame(animate);

@@ -10,6 +10,9 @@
   top: 30px;
   border: 1px solid black;
 }
+.hide_origin_cursor {
+  cursor: none;
+}
 .water-color-brush {
   /* background: black; */
   /* filter: blur(3px) contrast(10); */

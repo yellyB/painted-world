@@ -45,17 +45,24 @@ export class WaterColorBrush {
     this.ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     this.ctx.fill();
   }
+  cursor(size) {
+    this.ctx.fillStyle = `hsl(${this.color},${this.colorSaturationLevel}%,${this.colorLightnessLevel}%)`; // 색상, 채도, 명도
+
+    this.ctx.beginPath();
+    this.ctx.arc(this.x, this.y, size, 0, Math.PI * 2);
+    this.ctx.fill();
+  }
 }
 
 export class WaterDrop {
   // todo: 땅에 튕기는 바운스 여러번.
   // todo: 큰 구슬은 깨지기
   // todo: 떨어지는 궤적 남기기
-  constructor({ ctx, mouse, canvas, size }) {
+  constructor({ ctx, mouse, canvas }) {
     this.ctx = ctx;
     this.x = mouse.x;
     this.y = mouse.y;
-    this.size = size ? size : Math.random() * 80 + 10;
+    this.size = Math.random() * 80 + 10;
     this.canvas = canvas;
 
     this.image = new Image();
@@ -78,10 +85,6 @@ export class WaterDrop {
     return this.y > this.bottomCoordinates + this.size * 1.5;
   }
   update() {
-    // TODO: 추후 커서에 따라 미리보기 이미지 제공되면 정교하게 수정
-    // this.x += Math.random() * 100 - 50;
-    // this.y += Math.random() * 100 - 50;
-
     if (this.isDropping) {
       this.velocity += this.weight;
       this.y += Math.pow(this.velocity, this.accelLevel);
@@ -100,6 +103,15 @@ export class WaterDrop {
       this.y - 30 - this.size * 0.3,
       this.size,
       this.size
+    );
+  }
+  cursor(size) {
+    this.ctx.drawImage(
+      this.image,
+      this.x - size * 0.2,
+      this.y - 30 - size * 0.3,
+      40,
+      40
     );
   }
 }
@@ -137,11 +149,13 @@ class Vector {
 
 export class BugBrush {
   constructor({ x, y, selectedColor }) {
-    this.dst = new Vector(x, y);  // 벌레가 가야할 목적지
-    this.angle = Math.random() * Math.PI * 2;  // 랜덤한 각도로
-    this.startDistance = Math.random() * 100 + 50;  // 랜덤한 거리로
-    this.pos = this.dst.subtract(this.dst.rotate(this.angle).unit().multiply(this.startDistance));  // 거리를 두고 시작
-    this.velocity = new Vector(0, 0);  // 속도
+    this.dst = new Vector(x, y); // 벌레가 가야할 목적지
+    this.angle = Math.random() * Math.PI * 2; // 랜덤한 각도로
+    this.startDistance = Math.random() * 100 + 50; // 랜덤한 거리로
+    this.pos = this.dst.subtract(
+      this.dst.rotate(this.angle).unit().multiply(this.startDistance)
+    ); // 거리를 두고 시작
+    this.velocity = new Vector(0, 0); // 속도
     this.size = 3;
     this.color = selectedColor.h;
     this.colorLightnessLevel = 50;
@@ -156,53 +170,103 @@ export class BugBrush {
     ].reverse();
     this.legs = [
       {
-        start: new Vector(1, 0).rotate(Math.PI*20/16).scale(this.size),
+        start: new Vector(1, 0).rotate((Math.PI * 20) / 16).scale(this.size),
         joints: [
-          { angle: Math.PI*20/16, length: 6, bz1: Math.PI, bz2: Math.PI/2 },
-          { angle: Math.PI*11/16, length: 10, bz1: Math.PI, bz2: Math.PI*3/2 },
+          {
+            angle: (Math.PI * 20) / 16,
+            length: 6,
+            bz1: Math.PI,
+            bz2: Math.PI / 2,
+          },
+          {
+            angle: (Math.PI * 11) / 16,
+            length: 10,
+            bz1: Math.PI,
+            bz2: (Math.PI * 3) / 2,
+          },
         ],
       },
       {
         start: new Vector(1, 0).rotate(Math.PI).scale(this.size),
         joints: [
-          { angle: Math.PI*18/16, length: 3, bz1: Math.PI, bz2: Math.PI*3/2 },
-          { angle: Math.PI*11/16, length: 6, bz1: Math.PI, bz2: Math.PI/2 },
+          {
+            angle: (Math.PI * 18) / 16,
+            length: 3,
+            bz1: Math.PI,
+            bz2: (Math.PI * 3) / 2,
+          },
+          {
+            angle: (Math.PI * 11) / 16,
+            length: 6,
+            bz1: Math.PI,
+            bz2: Math.PI / 2,
+          },
         ],
       },
       {
-        start: new Vector(1, 0).rotate(Math.PI*12/16).scale(this.size),
+        start: new Vector(1, 0).rotate((Math.PI * 12) / 16).scale(this.size),
         joints: [
-          { angle: Math.PI*10/16, length: 3, bz1: Math.PI*12/16, bz2: Math.PI*3/2 },
-          { angle: Math.PI*6/16, length: 3, bz1: Math.PI/2, bz2: Math.PI*20/16 },
+          {
+            angle: (Math.PI * 10) / 16,
+            length: 3,
+            bz1: (Math.PI * 12) / 16,
+            bz2: (Math.PI * 3) / 2,
+          },
+          {
+            angle: (Math.PI * 6) / 16,
+            length: 3,
+            bz1: Math.PI / 2,
+            bz2: (Math.PI * 20) / 16,
+          },
         ],
       },
       // opposite side (mirrored)
       {
-        start: new Vector(1, 0).rotate(Math.PI*28/16).scale(this.size),
+        start: new Vector(1, 0).rotate((Math.PI * 28) / 16).scale(this.size),
         joints: [
-          { angle: Math.PI*28/16, length: 6, bz1: 0, bz2: Math.PI/2 },
-          { angle: Math.PI*5/16, length: 10, bz1: 0, bz2: Math.PI*3/2 },
+          { angle: (Math.PI * 28) / 16, length: 6, bz1: 0, bz2: Math.PI / 2 },
+          {
+            angle: (Math.PI * 5) / 16,
+            length: 10,
+            bz1: 0,
+            bz2: (Math.PI * 3) / 2,
+          },
         ],
       },
       {
         start: new Vector(1, 0).rotate(0).scale(this.size),
         joints: [
-          { angle: Math.PI*30/16, length: 3, bz1: 0, bz2: Math.PI*3/2 },
-          { angle: Math.PI*5/16, length: 6, bz1: 0, bz2: Math.PI/2 },
+          {
+            angle: (Math.PI * 30) / 16,
+            length: 3,
+            bz1: 0,
+            bz2: (Math.PI * 3) / 2,
+          },
+          { angle: (Math.PI * 5) / 16, length: 6, bz1: 0, bz2: Math.PI / 2 },
         ],
       },
       {
-        start: new Vector(1, 0).rotate(Math.PI/4).scale(this.size),
+        start: new Vector(1, 0).rotate(Math.PI / 4).scale(this.size),
         joints: [
-          { angle: Math.PI*6/16, length: 3, bz1: Math.PI/4, bz2: Math.PI*3/2 },
-          { angle: Math.PI*10/16, length: 3, bz1: Math.PI/2, bz2: Math.PI*28/16 },
+          {
+            angle: (Math.PI * 6) / 16,
+            length: 3,
+            bz1: Math.PI / 4,
+            bz2: (Math.PI * 3) / 2,
+          },
+          {
+            angle: (Math.PI * 10) / 16,
+            length: 3,
+            bz1: Math.PI / 2,
+            bz2: (Math.PI * 28) / 16,
+          },
         ],
-      }
+      },
     ];
   }
   update() {
     this.age += 1;
-    const currentPhase = this.phases.find(phase => this.age > phase.t);
+    const currentPhase = this.phases.find((phase) => this.age > phase.t);
     if (!currentPhase) return;
     this.velocity = currentPhase.velocity;
     if (this.pos.subtract(this.dst).magnitude() < this.destinationThreshold) {
@@ -226,19 +290,34 @@ export class BugBrush {
   }
   drawLegs(ctx) {
     ctx.beginPath();
-    ctx.lineWidth = .5;
-    ctx.strokeStyle = `hsl(${this.color},${this.colorSaturationLevel*.2}%,${this.colorLightnessLevel}%)`;
-    this.legs.forEach(leg => {
+    ctx.lineWidth = 0.5;
+    ctx.strokeStyle = `hsl(${this.color},${this.colorSaturationLevel * 0.2}%,${
+      this.colorLightnessLevel
+    }%)`;
+    this.legs.forEach((leg) => {
       let start = leg.start.add(this.pos);
       ctx.moveTo(start.x, start.y);
-      leg.joints.forEach(joint => {
-        const dest = start.add(new Vector(1, 0).rotate(joint.angle).scale(joint.length));
-        const startBezier = start.add(new Vector(1, 0).rotate(joint.bz1).scale(joint.length/4));
-        const destBezier = dest.add(new Vector(1, 0).rotate(joint.bz2).scale(joint.length/4));
-        ctx.bezierCurveTo(startBezier.x, startBezier.y, destBezier.x, destBezier.y, dest.x, dest.y);
+      leg.joints.forEach((joint) => {
+        const dest = start.add(
+          new Vector(1, 0).rotate(joint.angle).scale(joint.length)
+        );
+        const startBezier = start.add(
+          new Vector(1, 0).rotate(joint.bz1).scale(joint.length / 4)
+        );
+        const destBezier = dest.add(
+          new Vector(1, 0).rotate(joint.bz2).scale(joint.length / 4)
+        );
+        ctx.bezierCurveTo(
+          startBezier.x,
+          startBezier.y,
+          destBezier.x,
+          destBezier.y,
+          dest.x,
+          dest.y
+        );
         start = dest;
       });
-    })
+    });
     ctx.stroke();
   }
 }
