@@ -54,7 +54,7 @@ const animate = () => {
       moistureLevel: Number(moistureLevelElement.value),
       brushSize: Number(brushSizeElement.value),
       selectedColor,
-    }).cursor(Number(brushSizeElement.value) * 1.5);
+    }).cursor({ size: Number(brushSizeElement.value) * 1.5 });
   }
   if (brushSelector.value === brushType.BugBrush) {
     bugBrushes.forEach((i) => i.update());
@@ -68,7 +68,7 @@ const animate = () => {
       ctx,
       mouse,
       canvas,
-    }).cursor(40);
+    }).cursor({ size: 40 });
   }
 
   requestAnimationFrame(animate);
@@ -96,12 +96,14 @@ const handleClickAction = (e) => {
 
   if (brushSelector.value === brushType.WaterColorBrush) {
     handleCircles();
-  } else if (brushSelector.value === brushType.WaterDrop) {
+  }
+  if (brushSelector.value === brushType.WaterDrop) {
     waterDrops.push(
       new WaterDrop({
         ctx,
         mouse,
         canvas,
+        waterDrops,
       })
     );
 
@@ -109,6 +111,8 @@ const handleClickAction = (e) => {
   }
 };
 
+let timer = 0;
+const interval = 20;
 const handleMoveAction = (e) => {
   mouse.x = e.x;
   mouse.y = e.y;
@@ -121,8 +125,23 @@ const handleMoveAction = (e) => {
     for (let i = 0; i < brushVoulumn; i++) {
       handleCircles();
     }
-  } else if (brushSelector.value === brushType.BugBrush) {
+  }
+  if (brushSelector.value === brushType.BugBrush) {
     bugBrushes.push(new BugBrush({ x: e.x, y: e.y, selectedColor }));
+  }
+  if (brushSelector.value === brushType.WaterDrop) {
+    timer++;
+    if (timer >= interval) {
+      timer = 0;
+      waterDrops.push(
+        new WaterDrop({
+          ctx,
+          mouse,
+          canvas,
+          waterDrops,
+        })
+      );
+    }
   }
 };
 
