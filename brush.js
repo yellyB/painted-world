@@ -121,24 +121,35 @@ export class WaterDrop {
     });
   }
   update() {
+    const sizeRate = 0.005;
     this.handleCollision();
 
     if (this.collisionInfo.isCollision) {
       if (this.velocity <= 0) {
+        this.y++; // 속력 0인 경우도 중력때문에 아래로 떨어지게 하기 위해
         this.collisionInfo.isCollision = false;
         return;
       }
+
       if (this.collisionInfo.toSolveCollisionDirectionX === "+")
-        this.x += this.velocity;
-      else this.x -= this.velocity;
+        this.x += this.size * sizeRate;
+      else if (this.collisionInfo.toSolveCollisionDirectionX === "-")
+        this.x -= this.size * sizeRate;
 
       if (this.collisionInfo.toSolveCollisionDirectionY === "+")
         this.y += this.velocity;
-      else this.y -= this.velocity;
+      else if (this.collisionInfo.toSolveCollisionDirectionY === "-")
+        this.y -= this.velocity;
 
       this.velocity -= this.weight;
       return;
     }
+
+    // x축 이동하는 관성 유지 위해
+    if (this.collisionInfo.toSolveCollisionDirectionX === "+")
+      this.x += this.size * sizeRate;
+    else if (this.collisionInfo.toSolveCollisionDirectionX === "-")
+      this.x -= this.size * sizeRate;
 
     if (this.isDropping) {
       this.velocity += this.weight;
