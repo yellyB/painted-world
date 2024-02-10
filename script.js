@@ -46,29 +46,29 @@ const waterDrops = [];
 const animate = () => {
   clearCanvas({ ctx, canvas });
 
-  if (brushSelector.value === brushType.WaterColorBrush) {
-    drawCircles(ctx, circlesArray);
-    new WaterColorBrush({
-      ctx,
-      mouse,
-      moistureLevel: Number(moistureLevelElement.value),
-      brushSize: Number(brushSizeElement.value),
-      selectedColor,
-    }).cursor({ size: Number(brushSizeElement.value) * 1.5 });
-  }
-  if (brushSelector.value === brushType.BugBrush) {
-    bugBrushes.forEach((i) => i.update());
-    bugBrushes.forEach((i) => i.draw(ctx));
-    requestAnimationFrame(animate);
-    return;
-  }
-  if (brushSelector.value === brushType.WaterDrop) {
-    drawWaterDrops(ctx, waterDrops);
-    new WaterDrop({
-      ctx,
-      mouse,
-      canvas,
-    }).cursor({ size: 40 });
+  switch (brushSelector.value) {
+    case brushType.WaterColorBrush:
+      drawCircles(ctx, circlesArray);
+      new WaterColorBrush({
+        ctx,
+        mouse,
+        moistureLevel: Number(moistureLevelElement.value),
+        brushSize: Number(brushSizeElement.value),
+        selectedColor,
+      }).cursor({ size: Number(brushSizeElement.value) * 1.5 });
+      break;
+    case brushType.BugBrush:
+      bugBrushes.forEach((i) => i.update());
+      bugBrushes.forEach((i) => i.draw(ctx));
+      break;
+    case brushType.WaterDrop:
+      drawWaterDrops(ctx, waterDrops);
+      new WaterDrop({
+        ctx,
+        mouse,
+        canvas,
+      }).cursor({ size: 40 });
+      break;
   }
 
   requestAnimationFrame(animate);
