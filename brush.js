@@ -126,7 +126,8 @@ export class WaterDrop {
 
     if (this.collisionInfo.isCollision) {
       if (this.velocity <= 0) {
-        this.y++; // 속력 0인 경우도 중력때문에 아래로 떨어지게 하기 위해
+        this.velocity += this.weight;
+        this.y += this.velocity;
         this.collisionInfo.isCollision = false;
         return;
       }
@@ -398,18 +399,24 @@ export class MilkyWayBrush {
     this.age = 0;
     // 우주
     this.posDistance = Math.random() * 25 + 50;
-    this.pos = new Vector(0, 1).rotate(Math.random() * Math.PI * 2).scale(this.posDistance).add(new Vector(x, y));
+    this.pos = new Vector(0, 1)
+      .rotate(Math.random() * Math.PI * 2)
+      .scale(this.posDistance)
+      .add(new Vector(x, y));
     this.radius = Math.random() * 10 + 50;
     this.bgColor = 245;
     this.bgSaturation = 70;
     const bgLightnessMin = 4;
     const bgLightnessMax = 6;
-    this.bgLightness = Math.random() * (bgLightnessMax - bgLightnessMin) + bgLightnessMin;
+    this.bgLightness =
+      Math.random() * (bgLightnessMax - bgLightnessMin) + bgLightnessMin;
     this.bgOpacity = 0;
     // 별
     this.starSpeed = 0.05;
     this.starCount = Math.floor(Math.random() * 3 + 5);
-    this.stars = Array.from({ length: this.starCount }, () => this.createStar());
+    this.stars = Array.from({ length: this.starCount }, () =>
+      this.createStar()
+    );
     // 태양(낮은 확률로)
     if (Math.random() < 0.01) {
       this.stars.push(this.createSun());
@@ -455,14 +462,16 @@ export class MilkyWayBrush {
     const pos = new Vector(0, 1).rotate(angle).scale(this.radius).add(this.pos);
     const radius = Math.random() * 0.2 + 0.3;
     const angleVelocity = Math.random() * Math.PI * 2;
-    const velocity = new Vector(0, 1).rotate(angleVelocity).scale(Math.random() * this.starSpeed);
+    const velocity = new Vector(0, 1)
+      .rotate(angleVelocity)
+      .scale(Math.random() * this.starSpeed);
     return {
       sourcePos: pos,
       pos,
       velocity,
       radius,
       color: `hsl(0, 0%, 100%)`,
-    }
+    };
   }
   createSun() {
     return {
@@ -471,6 +480,6 @@ export class MilkyWayBrush {
       velocity: new Vector(0, 0),
       radius: Math.random() * 1 + 2,
       color: `hsl(40, 100%, 50%)`,
-    }
+    };
   }
 }
