@@ -3,7 +3,7 @@ import {
   WaterDrop,
   BugBrush,
   MilkyWayBrush,
-} from "./brush.js";
+} from "./brush/index.js";
 import { rgbToHsl, hexToRgb, clearCanvas } from "./utils.js";
 import { brushType } from "./type.js";
 
