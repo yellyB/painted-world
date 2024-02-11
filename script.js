@@ -1,4 +1,4 @@
-import { WaterColorBrush, WaterDrop, BugBrush } from "./brush.js";
+import { WaterColorBrush, WaterDrop, BugBrush, MilkyWayBrush } from "./brush.js";
 import { rgbToHsl, hexToRgb, clearCanvas } from "./utils.js";
 import { drawCircles, drawWaterDrops } from "./brushUtils.js";
 import { brushType } from "./type.js";
@@ -41,6 +41,7 @@ const selectedColor = {
 
 const circlesArray = [];
 const bugBrushes = [];
+const milkyWays = [];
 const waterDrops = [];
 
 const animate = () => {
@@ -68,6 +69,10 @@ const animate = () => {
         mouse,
         canvas,
       }).cursor({ size: 40 });
+      break;
+    case brushType.MilkyWayBrush:
+      milkyWays.forEach((i) => i.update());
+      milkyWays.forEach((i) => i.draw(ctx));
       break;
   }
 
@@ -142,6 +147,9 @@ const handleMoveAction = (e) => {
         })
       );
     }
+  }
+  if (brushSelector.value === brushType.MilkyWayBrush) {
+    milkyWays.push(new MilkyWayBrush({ x: e.x, y: e.y }));
   }
 };
 
