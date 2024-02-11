@@ -1,4 +1,9 @@
-import { WaterColorBrush, WaterDrop, BugBrush, MilkyWayBrush } from "./brush.js";
+import {
+  WaterColorBrush,
+  WaterDrop,
+  BugBrush,
+  MilkyWayBrush,
+} from "./brush.js";
 import { rgbToHsl, hexToRgb, clearCanvas } from "./utils.js";
 import { drawCircles, drawWaterDrops } from "./brushUtils.js";
 import { brushType } from "./type.js";
@@ -22,6 +27,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 let isDragging = false;
+let selectedBrushType = brushSelector.value;
 
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
@@ -44,42 +50,99 @@ const bugBrushes = [];
 const milkyWays = [];
 const waterDrops = [];
 
-const animate = () => {
-  clearCanvas({ ctx, canvas });
+const brushFunctions = {};
 
-  switch (brushSelector.value) {
+const buildBrushFunctions = () => {
+  switch (selectedBrushType) {
     case brushType.WaterColorBrush:
-      drawCircles(ctx, circlesArray);
-      new WaterColorBrush({
-        ctx,
-        mouse,
-        moistureLevel: Number(moistureLevelElement.value),
-        brushSize: Number(brushSizeElement.value),
-        selectedColor,
-      }).cursor({ size: Number(brushSizeElement.value) * 1.5 });
+      brushFunctions.animate = () => {
+        drawCircles(ctx, circlesArray);
+        new WaterColorBrush({
+          ctx,
+          mouse,
+          moistureLevel: Number(moistureLevelElement.value),
+          brushSize: Number(brushSizeElement.value),
+          selectedColor,
+        }).cursor({ size: Number(brushSizeElement.value) * 1.5 });
+      };
+      brushFunctions.click = () => {
+        handleCircles();
+      };
+      brushFunctions.drag = () => {
+        const brushVoulumn = 5; // 브러쉬를 풍성하게. 높을수록 많은 양
+        for (let i = 0; i < brushVoulumn; i++) {
+          handleCircles();
+        }
+      };
       break;
+
     case brushType.BugBrush:
-      bugBrushes.forEach((i) => i.update());
-      bugBrushes.forEach((i) => i.draw(ctx));
+      brushFunctions.animate = () => {
+        bugBrushes.forEach((i) => i.update());
+        bugBrushes.forEach((i) => i.draw(ctx));
+      };
+      brushFunctions.drag = () => {
+        bugBrushes.push(
+          new BugBrush({ x: mouse.x, y: mouse.y, selectedColor })
+        );
+      };
       break;
+
     case brushType.WaterDrop:
-      drawWaterDrops(ctx, waterDrops);
-      new WaterDrop({
-        ctx,
-        mouse,
-        canvas,
-      }).cursor({ size: 40 });
+      brushFunctions.animate = () => {
+        drawWaterDrops(ctx, waterDrops);
+        new WaterDrop({
+          ctx,
+          mouse,
+          canvas,
+        }).cursor({ size: 40 });
+      };
+      brushFunctions.click = () => {
+        waterDrops.push(
+          new WaterDrop({
+            ctx,
+            mouse,
+            canvas,
+            waterDrops,
+          })
+        );
+      };
+      brushFunctions.drag = () => {
+        timer++;
+        if (timer >= interval) {
+          timer = 0;
+          waterDrops.push(
+            new WaterDrop({
+              ctx,
+              mouse,
+              canvas,
+              waterDrops,
+            })
+          );
+        }
+      };
       break;
+
     case brushType.MilkyWayBrush:
-      milkyWays.forEach((i) => i.update());
-      milkyWays.forEach((i) => i.draw(ctx));
+      brushFunctions.animate = () => {
+        milkyWays.forEach((i) => i.update());
+        milkyWays.forEach((i) => i.draw(ctx));
+      };
+      brushFunctions.drag = () => {
+        milkyWays.push(new MilkyWayBrush({ x: mouse.x, y: mouse.y }));
+      };
       break;
   }
+};
 
+const animate = () => {
+  clearCanvas({ ctx, canvas });
+  brushFunctions.animate?.();
   requestAnimationFrame(animate);
 };
 
 animate();
+buildBrushFunctions();
 
 const handleCircles = () => {
   circlesArray.push(
@@ -99,21 +162,7 @@ const handleClickAction = (e) => {
   mouse.x = e.x;
   mouse.y = e.y;
 
-  if (brushSelector.value === brushType.WaterColorBrush) {
-    handleCircles();
-  }
-  if (brushSelector.value === brushType.WaterDrop) {
-    waterDrops.push(
-      new WaterDrop({
-        ctx,
-        mouse,
-        canvas,
-        waterDrops,
-      })
-    );
-
-    // brush.draw();
-  }
+  brushFunctions.click?.();
 };
 
 let timer = 0;
@@ -124,33 +173,7 @@ const handleMoveAction = (e) => {
 
   if (!isDragging) return;
 
-  if (brushSelector.value === brushType.WaterColorBrush) {
-    const brushVoulumn = 5; // 브러쉬를 풍성하게. 높을수록 많은 양
-
-    for (let i = 0; i < brushVoulumn; i++) {
-      handleCircles();
-    }
-  }
-  if (brushSelector.value === brushType.BugBrush) {
-    bugBrushes.push(new BugBrush({ x: e.x, y: e.y, selectedColor }));
-  }
-  if (brushSelector.value === brushType.WaterDrop) {
-    timer++;
-    if (timer >= interval) {
-      timer = 0;
-      waterDrops.push(
-        new WaterDrop({
-          ctx,
-          mouse,
-          canvas,
-          waterDrops,
-        })
-      );
-    }
-  }
-  if (brushSelector.value === brushType.MilkyWayBrush) {
-    milkyWays.push(new MilkyWayBrush({ x: e.x, y: e.y }));
-  }
+  brushFunctions.drag?.();
 };
 
 const handleReleaseAction = () => {
@@ -175,7 +198,9 @@ canvas.addEventListener("touchmove", (e) => {
 });
 canvas.addEventListener("touchend", () => handleReleaseAction());
 
-brushSelector.addEventListener("change", () => {
+brushSelector.addEventListener("change", (e) => {
+  selectedBrushType = e.target.value;
+  buildBrushFunctions();
   clearCanvas({ ctx, canvas });
 });
 
