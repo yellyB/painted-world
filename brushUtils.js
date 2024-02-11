@@ -1,12 +1,12 @@
-export const drawCircles = (ctx, circlesArray) => {
-  for (let i = 0; i < circlesArray.length; i++) {
-    const circleI = circlesArray[i];
+export const drawCircles = (ctx, list) => {
+  for (let i = 0; i < list.length; i++) {
+    const circleI = list[i];
     circleI.update();
     circleI.draw();
 
     // 이미 그려진 궤적과 합치기 위해서 그려진 점들을 연결한다.
-    // for (let j = i; j < circlesArray.length; j++) {
-    //   const cicleJ = circlesArray[j];
+    // for (let j = i; j < list.length; j++) {
+    //   const cicleJ = list[j];
     //   // 피타고라스 이용해서 점 간 거리를 구하기. (기울기)
     //   const dx = cicleI.x - cicleJ.x;
     //   const dy = cicleI.y - cicleJ.y;
@@ -23,8 +23,8 @@ export const drawCircles = (ctx, circlesArray) => {
     // }
 
     // 원이 흐려지고 있는 중이라면, 원을 아예 제거하기
-    if (circlesArray[i].isFading) {
-      circlesArray.splice(i, 1);
+    if (list[i].isFading) {
+      list.splice(i, 1);
       i--;
     }
   }

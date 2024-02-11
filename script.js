@@ -5,14 +5,7 @@ import {
   MilkyWayBrush,
 } from "./brush.js";
 import { rgbToHsl, hexToRgb, clearCanvas } from "./utils.js";
-import { drawCircles, drawWaterDrops } from "./brushUtils.js";
 import { brushType } from "./type.js";
-
-/**
- * TODO:
- * - 마우스 커서에 내가 그릴 브러쉬 모양이 미리 보이게
- * - 지우개(그린걸 남길 수 있게 된 경우)
- */
 
 const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext("2d");
@@ -29,11 +22,6 @@ canvas.height = window.innerHeight;
 let isDragging = false;
 let selectedBrushType = brushSelector.value;
 
-window.addEventListener("resize", () => {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-});
-
 const mouse = {
   x: undefined,
   y: undefined,
@@ -45,10 +33,10 @@ const selectedColor = {
   l: undefined, // 아직 사용 안함
 };
 
-const circlesArray = [];
+let waterColorCircles = [];
 const bugBrushes = [];
 const milkyWays = [];
-const waterDrops = [];
+let waterDrops = [];
 
 const brushFunctions = {};
 
@@ -56,7 +44,14 @@ const buildBrushFunctions = () => {
   switch (selectedBrushType) {
     case brushType.WaterColorBrush:
       brushFunctions.animate = () => {
-        drawCircles(ctx, circlesArray);
+        waterColorCircles.forEach((waterColorCircle) => {
+          waterColorCircle.update();
+          waterColorCircle.draw();
+        });
+        waterColorCircles = waterColorCircles.filter(
+          (waterColorCircle) => !waterColorCircle.isFading
+        );
+
         new WaterColorBrush({
           ctx,
           mouse,
@@ -66,12 +61,28 @@ const buildBrushFunctions = () => {
         }).cursor({ size: Number(brushSizeElement.value) * 1.5 });
       };
       brushFunctions.click = () => {
-        handleCircles();
+        waterColorCircles.push(
+          new WaterColorBrush({
+            ctx,
+            mouse,
+            moistureLevel: Number(moistureLevelElement.value),
+            brushSize: Number(brushSizeElement.value),
+            selectedColor,
+          })
+        );
       };
       brushFunctions.drag = () => {
         const brushVoulumn = 5; // 브러쉬를 풍성하게. 높을수록 많은 양
         for (let i = 0; i < brushVoulumn; i++) {
-          handleCircles();
+          waterColorCircles.push(
+            new WaterColorBrush({
+              ctx,
+              mouse,
+              moistureLevel: Number(moistureLevelElement.value),
+              brushSize: Number(brushSizeElement.value),
+              selectedColor,
+            })
+          );
         }
       };
       break;
@@ -90,7 +101,14 @@ const buildBrushFunctions = () => {
 
     case brushType.WaterDrop:
       brushFunctions.animate = () => {
-        drawWaterDrops(ctx, waterDrops);
+        waterDrops.forEach((waterDrop) => {
+          waterDrop.update();
+          waterDrop.draw();
+        });
+        waterDrops = waterDrops.filter(
+          (waterDrop) => !waterDrop.isOutOfCanvas()
+        );
+
         new WaterDrop({
           ctx,
           mouse,
@@ -107,6 +125,8 @@ const buildBrushFunctions = () => {
           })
         );
       };
+      let timer = 0;
+      const interval = 20;
       brushFunctions.drag = () => {
         timer++;
         if (timer >= interval) {
@@ -144,18 +164,6 @@ const animate = () => {
 animate();
 buildBrushFunctions();
 
-const handleCircles = () => {
-  circlesArray.push(
-    new WaterColorBrush({
-      ctx,
-      mouse,
-      moistureLevel: Number(moistureLevelElement.value),
-      brushSize: Number(brushSizeElement.value),
-      selectedColor,
-    })
-  );
-};
-
 const handleClickAction = (e) => {
   isDragging = true;
 
@@ -165,8 +173,6 @@ const handleClickAction = (e) => {
   brushFunctions.click?.();
 };
 
-let timer = 0;
-const interval = 20;
 const handleMoveAction = (e) => {
   mouse.x = e.x;
   mouse.y = e.y;
@@ -179,6 +185,15 @@ const handleMoveAction = (e) => {
 const handleReleaseAction = () => {
   isDragging = false;
 };
+
+function updateColor() {
+  const color = colorPicker.value;
+  const hslColor = rgbToHsl(hexToRgb(color));
+
+  selectedColor.h = hslColor[0];
+  selectedColor.s = hslColor[1];
+  selectedColor.l = hslColor[2];
+}
 
 canvas.addEventListener("mousedown", (e) => handleClickAction(e));
 canvas.addEventListener("mousemove", (e) => handleMoveAction(e));
@@ -204,13 +219,9 @@ brushSelector.addEventListener("change", (e) => {
   clearCanvas({ ctx, canvas });
 });
 
-function updateColor() {
-  const color = colorPicker.value;
-  const hslColor = rgbToHsl(hexToRgb(color));
-
-  selectedColor.h = hslColor[0];
-  selectedColor.s = hslColor[1];
-  selectedColor.l = hslColor[2];
-}
-
 colorPicker.addEventListener("change", () => updateColor());
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
