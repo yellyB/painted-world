@@ -10,7 +10,7 @@ export class MilkyWayBrush {
       .scale(this.posDistance)
       .add(new Vector(x, y));
     this.radius = Math.random() * 10 + 50;
-    this.bgColor = 245;
+    this.bgColor = 200;
     this.bgSaturation = 70;
     const bgLightnessMin = 4;
     const bgLightnessMax = 6;
@@ -19,6 +19,7 @@ export class MilkyWayBrush {
     this.bgOpacity = 0;
     // 별
     this.starSpeed = 0.05;
+    this.starRadius = 0.7;
     this.starCount = Math.floor(Math.random() * 3 + 5);
     this.stars = Array.from({ length: this.starCount }, () =>
       this.createStar()
@@ -66,7 +67,7 @@ export class MilkyWayBrush {
   createStar() {
     const angle = Math.random() * Math.PI * 2;
     const pos = new Vector(0, 1).rotate(angle).scale(this.radius).add(this.pos);
-    const radius = Math.random() * 0.2 + 0.3;
+    const radius = Math.random() * 0.5 + this.starRadius;
     const angleVelocity = Math.random() * Math.PI * 2;
     const velocity = new Vector(0, 1)
       .rotate(angleVelocity)
