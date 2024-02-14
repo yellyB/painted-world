@@ -3,7 +3,7 @@ import {
   WaterDrop,
   BugBrush,
   MilkyWayBrush,
-  CoffeeBrush,
+  FlowFieldBrush,
 } from "./brush/index.js";
 import { rgbToHsl, hexToRgb, clearCanvas } from "./utils.js";
 import { brushType } from "./type.js";
@@ -38,7 +38,7 @@ let waterColorCircles = [];
 const bugBrushes = [];
 const milkyWays = [];
 let waterDrops = [];
-let coffeeCircles = [];
+let flowFieldes = [];
 
 const brushFunctions = {};
 
@@ -155,39 +155,15 @@ const buildBrushFunctions = () => {
       };
       break;
 
-    case brushType.CoffeeBrush:
+    case brushType.FlowFieldBrush:
       brushFunctions.animate = () => {
-        coffeeCircles.forEach((coffeeCircle) => {
-          coffeeCircle.update();
-          coffeeCircle.draw();
-          // coffeeCircle.connectCircles();
+        flowFieldes.forEach((i) => {
+          i.update();
+          i.draw(ctx);
         });
-        coffeeCircles = coffeeCircles.filter(
-          (coffeeCircle) => !coffeeCircle.isDelete
-        );
       };
       brushFunctions.click = () => {
-        coffeeCircles.push(
-          new CoffeeBrush({
-            ctx,
-            mouse,
-            canvas,
-            coffeeCircles,
-          })
-        );
-      };
-      brushFunctions.drag = () => {
-        const brushVoulumn = 1;
-        for (let i = 0; i < brushVoulumn; i++) {
-          coffeeCircles.push(
-            new CoffeeBrush({
-              ctx,
-              mouse,
-              canvas,
-              coffeeCircles,
-            })
-          );
-        }
+        flowFieldes.push(new FlowFieldBrush({ ctx, mouse, canvas }));
       };
       break;
   }
