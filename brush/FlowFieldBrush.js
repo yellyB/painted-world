@@ -7,19 +7,44 @@ export class FlowFieldBrush {
     this.canvas = canvas;
 
     this.pos = new Vector(mouse.x, mouse.y);
-    this.speed = Math.random() * 5 - 2.5;
+
+    this.angle = 0;
+    this.speed = new Vector(1, 1);
     this.trajectories = [this.pos]; // 궤적
     this.maxLenOfTrajectory = Math.floor(Math.random() * 100 + 20); // 20~100
+
+    // flow field
+    this.cellSize = 20;
+    this.rows;
+    this.cols;
+    this.flowField = [];
+    this.generateFlowField();
+  }
+  generateFlowField() {
+    this.rows = Math.floor(this.canvas.height / this.cellSize);
+    this.cols = Math.floor(this.canvas.width / this.cellSize);
+
+    for (let row = 0; row < this.rows; row++) {
+      this.flowField.push([]);
+      for (let col = 0; col < this.cols; col++) {
+        const angle = Math.sin(row) + Math.cos(col);
+        this.flowField[row].push(angle);
+      }
+    }
   }
   update() {
-    const jiggleLevel = 8;
+    let currRowIndex = Math.floor(this.pos.y / this.cellSize);
+    let currColIndex = Math.floor(this.pos.x / this.cellSize);
 
-    this.pos = this.pos.add(
-      new Vector(
-        this.speed + Math.random() * (jiggleLevel * 2) - jiggleLevel,
-        this.speed + Math.random() * (jiggleLevel * 2) - jiggleLevel
-      )
-    );
+    try {
+      this.angle = this.flowField[currRowIndex][currColIndex];
+    } catch (e) {
+      // todo: 바깥으로 나갔다. 요소 제거
+      return;
+    }
+
+    const newSpeed = new Vector(Math.sin(this.angle), Math.cos(this.angle)); // 상-하, 좌-우 sin,cos로 결정
+    this.pos = this.pos.add(newSpeed);
     this.trajectories.push(this.pos);
     if (this.trajectories.length > this.maxLenOfTrajectory) {
       this.trajectories = this.trajectories.slice(1);
