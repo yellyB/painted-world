@@ -9,6 +9,9 @@
   height: calc(100% - 30px);
   top: 30px;
   border: 1px solid black;
+
+  /* background: black; */
+  /* filter: blur(6px) contrast(10); */
 }
 .hide_origin_cursor {
   cursor: none;

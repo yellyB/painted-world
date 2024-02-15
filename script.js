@@ -3,6 +3,7 @@ import {
   WaterDrop,
   BugBrush,
   MilkyWayBrush,
+  CoffeeBrush,
 } from "./brush/index.js";
 import { rgbToHsl, hexToRgb, clearCanvas } from "./utils.js";
 import { brushType } from "./type.js";
@@ -37,6 +38,7 @@ let waterColorCircles = [];
 const bugBrushes = [];
 const milkyWays = [];
 let waterDrops = [];
+let coffeeCircles = [];
 
 const brushFunctions = {};
 
@@ -150,6 +152,42 @@ const buildBrushFunctions = () => {
       };
       brushFunctions.drag = () => {
         milkyWays.push(new MilkyWayBrush({ x: mouse.x, y: mouse.y }));
+      };
+      break;
+
+    case brushType.CoffeeBrush:
+      brushFunctions.animate = () => {
+        coffeeCircles.forEach((coffeeCircle) => {
+          coffeeCircle.update();
+          coffeeCircle.draw();
+          // coffeeCircle.connectCircles();
+        });
+        coffeeCircles = coffeeCircles.filter(
+          (coffeeCircle) => !coffeeCircle.isDelete
+        );
+      };
+      brushFunctions.click = () => {
+        coffeeCircles.push(
+          new CoffeeBrush({
+            ctx,
+            mouse,
+            canvas,
+            coffeeCircles,
+          })
+        );
+      };
+      brushFunctions.drag = () => {
+        const brushVoulumn = 1;
+        for (let i = 0; i < brushVoulumn; i++) {
+          coffeeCircles.push(
+            new CoffeeBrush({
+              ctx,
+              mouse,
+              canvas,
+              coffeeCircles,
+            })
+          );
+        }
       };
       break;
   }
