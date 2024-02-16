@@ -164,9 +164,14 @@ const buildBrushFunctions = () => {
         });
         flowFieldes = flowFieldes.filter((flowField) => !flowField.isDie);
       };
-
       brushFunctions.click = () => {
         flowFieldes.push(new FlowFieldBrush({ ctx, mouse, canvas }));
+      };
+      brushFunctions.drag = () => {
+        const brushVoulumn = 5;
+        for (let i = 0; i < brushVoulumn; i++) {
+          flowFieldes.push(new FlowFieldBrush({ ctx, mouse, canvas }));
+        }
       };
       break;
   }

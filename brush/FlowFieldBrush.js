@@ -6,19 +6,19 @@ export class FlowFieldBrush {
     this.mouse = mouse;
     this.canvas = canvas;
 
-    this.pos = new Vector(mouse.x, mouse.y);
-    // this.pos = new Vector(
-    //   Math.floor(Math.random() * this.canvas.width),
-    //   Math.floor(Math.random() * this.canvas.height)
-    // );
-
+    const gap = 20;
+    this.pos = new Vector(
+      mouse.x + Math.floor(Math.random() * (gap * 2) - gap),
+      mouse.y + Math.floor(Math.random() * (gap * 2) - gap)
+    );
     this.angle = 0;
     this.speed = new Vector(1, 1);
     this.velocity = Math.floor(Math.random() * 3 + 1);
     this.trajectories = [this.pos]; // 궤적
     this.maxLenOfTrajectory = Math.floor(Math.random() * 100 + 20); // 20~100
-    this.timer = Math.floor(Math.random() * 100 + 40);
+    this.lives = Math.floor(Math.random() * 100 + 40);
     this.isDie = false;
+    this.vectorMethod = ["add", "subtract"][Math.floor(Math.random() * 2)];
 
     // flow field
     this.cellSize = 20;
@@ -28,8 +28,8 @@ export class FlowFieldBrush {
     this.generateFlowField();
   }
   generateFlowField() {
-    const jiggleVolumn = 1;
-    const zoom = 1;
+    const jiggleVolumn = 2;
+    const zoom = 0.3;
     this.rows = Math.floor(this.canvas.height / this.cellSize);
     this.cols = Math.floor(this.canvas.width / this.cellSize);
 
@@ -37,15 +37,15 @@ export class FlowFieldBrush {
       this.flowField.push([]);
       for (let col = 0; col < this.cols; col++) {
         const angle =
-          (Math.cos(row * zoom) + Math.sin(col * zoom)) * jiggleVolumn;
+          (Math.sin(row * zoom) + Math.cos(col * zoom)) * jiggleVolumn;
         this.flowField[row].push(angle);
       }
     }
   }
   update() {
-    this.timer--;
+    this.lives--;
 
-    if (this.timer < 1) {
+    if (this.lives < 1) {
       this.isDie = true;
       return;
     }
@@ -56,15 +56,15 @@ export class FlowFieldBrush {
     try {
       this.angle = this.flowField[currRowIndex][currColIndex];
     } catch (e) {
-      // todo: 바깥으로 나갔다. 요소 제거
+      this.isDie = true;
       return;
     }
 
     const newSpeed = new Vector(
-      Math.cos(this.angle) + this.velocity,
-      Math.sin(this.angle) + this.velocity
-    ); // 상-하, 좌-우 sin,cos로 결정
-    this.pos = this.pos.add(newSpeed);
+      Math.sin(this.angle) + this.velocity,
+      Math.cos(this.angle) + this.velocity
+    );
+    this.pos = this.pos[this.vectorMethod](newSpeed);
     this.trajectories.push(this.pos);
     if (this.trajectories.length > this.maxLenOfTrajectory) {
       this.trajectories = this.trajectories.slice(1);
