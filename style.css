@@ -9,16 +9,12 @@
   height: calc(100% - 30px);
   top: 30px;
   border: 1px solid black;
-
-  /* background: black; */
-  /* filter: blur(6px) contrast(10); */
 }
 .hide_origin_cursor {
   cursor: none;
 }
-.water-color-brush {
-  /* background: black; */
-  /* filter: blur(3px) contrast(10); */
+.flow-field {
+  background: gray;
 }
 .controller {
   position: absolute;
@@ -26,4 +22,10 @@
 }
 input {
   width: 50px;
+}
+.flow-field-controller {
+  display: none;
+}
+.water-color-controller {
+  display: none;
 }

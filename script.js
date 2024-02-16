@@ -3,7 +3,7 @@ import {
   WaterDrop,
   BugBrush,
   MilkyWayBrush,
-  CoffeeBrush,
+  FlowFieldBrush,
 } from "./brush/index.js";
 import { rgbToHsl, hexToRgb, clearCanvas } from "./utils.js";
 import { brushType } from "./type.js";
@@ -13,9 +13,17 @@ const ctx = canvas.getContext("2d");
 
 const moistureLevelElement = document.querySelector(".moistureLevel");
 const brushSizeElement = document.querySelector(".brushSize");
+const tichknessElement = document.querySelector(".tichkness");
+const jiggleVolumnElement = document.querySelector(".jiggleVolumn");
+const zoomElement = document.querySelector(".zoom");
 
 const colorPicker = document.getElementById("colorPicker");
 const brushSelector = document.getElementById("brushSelector");
+
+const waterColorControllerDiv = document.querySelector(
+  ".water-color-controller"
+);
+const flowFieldControllerDiv = document.querySelector(".flow-field-controller");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -38,7 +46,7 @@ let waterColorCircles = [];
 const bugBrushes = [];
 const milkyWays = [];
 let waterDrops = [];
-let coffeeCircles = [];
+let flowFieldes = [];
 
 const brushFunctions = {};
 
@@ -155,38 +163,34 @@ const buildBrushFunctions = () => {
       };
       break;
 
-    case brushType.CoffeeBrush:
+    case brushType.FlowFieldBrush:
+      let hueCicle = 0;
+      let params = {};
       brushFunctions.animate = () => {
-        coffeeCircles.forEach((coffeeCircle) => {
-          coffeeCircle.update();
-          coffeeCircle.draw();
-          // coffeeCircle.connectCircles();
+        params = {
+          ctx,
+          mouse,
+          canvas,
+          hue: hueCicle,
+          tichkness: Number(tichknessElement.value),
+          jiggleVolumn: Number(jiggleVolumnElement.value),
+          zoom: Number(zoomElement.value),
+        };
+        // new FlowFieldBrush(params).turnOnDebug(ctx);
+        flowFieldes.forEach((flowField) => {
+          flowField.update();
+          flowField.draw(ctx);
         });
-        coffeeCircles = coffeeCircles.filter(
-          (coffeeCircle) => !coffeeCircle.isDelete
-        );
+        flowFieldes = flowFieldes.filter((flowField) => !flowField.isDie);
       };
       brushFunctions.click = () => {
-        coffeeCircles.push(
-          new CoffeeBrush({
-            ctx,
-            mouse,
-            canvas,
-            coffeeCircles,
-          })
-        );
+        flowFieldes.push(new FlowFieldBrush(params));
       };
       brushFunctions.drag = () => {
-        const brushVoulumn = 1;
+        const brushVoulumn = 30;
+        hueCicle++;
         for (let i = 0; i < brushVoulumn; i++) {
-          coffeeCircles.push(
-            new CoffeeBrush({
-              ctx,
-              mouse,
-              canvas,
-              coffeeCircles,
-            })
-          );
+          flowFieldes.push(new FlowFieldBrush(params));
         }
       };
       break;
@@ -198,9 +202,6 @@ const animate = () => {
   brushFunctions.animate?.();
   requestAnimationFrame(animate);
 };
-
-animate();
-buildBrushFunctions();
 
 const handleClickAction = (e) => {
   isDragging = true;
@@ -233,6 +234,19 @@ function updateColor() {
   selectedColor.l = hslColor[2];
 }
 
+const initCanvasSetting = () => {
+  if (selectedBrushType === brushType.FlowFieldBrush) {
+    canvas.classList.add("flow-field");
+    waterColorControllerDiv.style.display = "none";
+    flowFieldControllerDiv.style.display = "inline";
+  } else {
+    canvas.classList.remove("flow-field");
+    waterColorControllerDiv.style.display = "inline";
+    flowFieldControllerDiv.style.display = "none";
+  }
+  clearCanvas({ ctx, canvas });
+};
+
 canvas.addEventListener("mousedown", (e) => handleClickAction(e));
 canvas.addEventListener("mousemove", (e) => handleMoveAction(e));
 canvas.addEventListener("mouseup", () => handleReleaseAction());
@@ -254,7 +268,7 @@ canvas.addEventListener("touchend", () => handleReleaseAction());
 brushSelector.addEventListener("change", (e) => {
   selectedBrushType = e.target.value;
   buildBrushFunctions();
-  clearCanvas({ ctx, canvas });
+  initCanvasSetting();
 });
 
 colorPicker.addEventListener("change", () => updateColor());
@@ -263,3 +277,7 @@ window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 });
+
+animate();
+buildBrushFunctions();
+initCanvasSetting();
