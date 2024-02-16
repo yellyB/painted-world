@@ -10,6 +10,7 @@ export class FlowFieldBrush {
 
     this.angle = 0;
     this.speed = new Vector(1, 1);
+    this.velocity = Math.floor(Math.random() * 3 + 1);
     this.trajectories = [this.pos]; // 궤적
     this.maxLenOfTrajectory = Math.floor(Math.random() * 100 + 20); // 20~100
 
@@ -21,13 +22,16 @@ export class FlowFieldBrush {
     this.generateFlowField();
   }
   generateFlowField() {
+    const jiggleVolumn = 1;
+    const zoom = 1;
     this.rows = Math.floor(this.canvas.height / this.cellSize);
     this.cols = Math.floor(this.canvas.width / this.cellSize);
 
     for (let row = 0; row < this.rows; row++) {
       this.flowField.push([]);
       for (let col = 0; col < this.cols; col++) {
-        const angle = Math.sin(row) + Math.cos(col);
+        const angle =
+          (Math.cos(row * zoom) + Math.sin(col * zoom)) * jiggleVolumn;
         this.flowField[row].push(angle);
       }
     }
@@ -43,7 +47,10 @@ export class FlowFieldBrush {
       return;
     }
 
-    const newSpeed = new Vector(Math.sin(this.angle), Math.cos(this.angle)); // 상-하, 좌-우 sin,cos로 결정
+    const newSpeed = new Vector(
+      Math.cos(this.angle) + this.velocity,
+      Math.sin(this.angle) + this.velocity
+    ); // 상-하, 좌-우 sin,cos로 결정
     this.pos = this.pos.add(newSpeed);
     this.trajectories.push(this.pos);
     if (this.trajectories.length > this.maxLenOfTrajectory) {
