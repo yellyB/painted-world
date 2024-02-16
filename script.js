@@ -13,9 +13,17 @@ const ctx = canvas.getContext("2d");
 
 const moistureLevelElement = document.querySelector(".moistureLevel");
 const brushSizeElement = document.querySelector(".brushSize");
+const tichknessElement = document.querySelector(".tichkness");
+const jiggleVolumnElement = document.querySelector(".jiggleVolumn");
+const zoomElement = document.querySelector(".zoom");
 
 const colorPicker = document.getElementById("colorPicker");
 const brushSelector = document.getElementById("brushSelector");
+
+const waterColorControllerDiv = document.querySelector(
+  ".water-color-controller"
+);
+const flowFieldControllerDiv = document.querySelector(".flow-field-controller");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -156,8 +164,19 @@ const buildBrushFunctions = () => {
       break;
 
     case brushType.FlowFieldBrush:
+      let hueCicle = 0;
+      let params = {};
       brushFunctions.animate = () => {
-        // new FlowFieldBrush({ ctx, mouse, canvas }).turnOnDebug(ctx);
+        params = {
+          ctx,
+          mouse,
+          canvas,
+          hue: hueCicle,
+          tichkness: Number(tichknessElement.value),
+          jiggleVolumn: Number(jiggleVolumnElement.value),
+          zoom: Number(zoomElement.value),
+        };
+        // new FlowFieldBrush(params).turnOnDebug(ctx);
         flowFieldes.forEach((flowField) => {
           flowField.update();
           flowField.draw(ctx);
@@ -165,12 +184,13 @@ const buildBrushFunctions = () => {
         flowFieldes = flowFieldes.filter((flowField) => !flowField.isDie);
       };
       brushFunctions.click = () => {
-        flowFieldes.push(new FlowFieldBrush({ ctx, mouse, canvas }));
+        flowFieldes.push(new FlowFieldBrush(params));
       };
       brushFunctions.drag = () => {
-        const brushVoulumn = 5;
+        const brushVoulumn = 30;
+        hueCicle++;
         for (let i = 0; i < brushVoulumn; i++) {
-          flowFieldes.push(new FlowFieldBrush({ ctx, mouse, canvas }));
+          flowFieldes.push(new FlowFieldBrush(params));
         }
       };
       break;
@@ -182,9 +202,6 @@ const animate = () => {
   brushFunctions.animate?.();
   requestAnimationFrame(animate);
 };
-
-animate();
-buildBrushFunctions();
 
 const handleClickAction = (e) => {
   isDragging = true;
@@ -217,6 +234,19 @@ function updateColor() {
   selectedColor.l = hslColor[2];
 }
 
+const initCanvasSetting = () => {
+  if (selectedBrushType === brushType.FlowFieldBrush) {
+    canvas.classList.add("flow-field");
+    waterColorControllerDiv.style.display = "none";
+    flowFieldControllerDiv.style.display = "inline";
+  } else {
+    canvas.classList.remove("flow-field");
+    waterColorControllerDiv.style.display = "inline";
+    flowFieldControllerDiv.style.display = "none";
+  }
+  clearCanvas({ ctx, canvas });
+};
+
 canvas.addEventListener("mousedown", (e) => handleClickAction(e));
 canvas.addEventListener("mousemove", (e) => handleMoveAction(e));
 canvas.addEventListener("mouseup", () => handleReleaseAction());
@@ -238,7 +268,7 @@ canvas.addEventListener("touchend", () => handleReleaseAction());
 brushSelector.addEventListener("change", (e) => {
   selectedBrushType = e.target.value;
   buildBrushFunctions();
-  clearCanvas({ ctx, canvas });
+  initCanvasSetting();
 });
 
 colorPicker.addEventListener("change", () => updateColor());
@@ -247,3 +277,7 @@ window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 });
+
+animate();
+buildBrushFunctions();
+initCanvasSetting();

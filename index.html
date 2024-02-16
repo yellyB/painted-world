@@ -14,25 +14,45 @@
         <option value="WaterDrop">💧WaterDrop</option>
         <option value="BugBrush">Bug🐞Brush</option>
         <option value="MilkyWayBrush">🌌MilkyWayBrush</option>
-        <option value="FlowFieldBrush" selected>FlowFieldBrush</option>
+        <option value="FlowFieldBrush" selected>FlowField🌬️Brush</option>
       </select>
 
-      size:<input
-        type="number"
-        class="brushSize"
-        placeholder="brush size"
-        value="10"
-      />
-      moistureLevel:<input
-        type="number"
-        class="moistureLevel"
-        placeholder="moistureLevel"
-        value="0.5"
-      />
+      <div class="water-color-controller">
+        size:<input
+          type="number"
+          class="brushSize"
+          placeholder="brush size"
+          value="10"
+        />
+        moistureLevel:<input
+          type="number"
+          class="moistureLevel"
+          placeholder="moistureLevel"
+          value="0.5"
+        />
+      </div>
+      <div class="flow-field-controller">
+        tichkness:
+        <input
+          type="number"
+          class="tichkness"
+          placeholder="tichkness"
+          value="0.8"
+        />
+        jiggleVolumn:
+        <input
+          type="number"
+          class="jiggleVolumn"
+          placeholder="jiggleVolumn"
+          value="1"
+        />
+        zoom(0에 가까울수록 확대):
+        <input type="number" class="zoom" placeholder="zoom" value="0.5" />
+      </div>
       color:<input type="color" id="colorPicker" value="#FF0000" />
     </div>
 
-    <canvas id="canvas1" class="water-color-brush"></canvas>
+    <canvas id="canvas1"></canvas>
 
     <script type="module" src="script.js"></script>
   </body>
