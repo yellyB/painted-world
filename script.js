@@ -157,11 +157,14 @@ const buildBrushFunctions = () => {
 
     case brushType.FlowFieldBrush:
       brushFunctions.animate = () => {
-        flowFieldes.forEach((i) => {
-          i.update();
-          i.draw(ctx);
+        // new FlowFieldBrush({ ctx, mouse, canvas }).turnOnDebug(ctx);
+        flowFieldes.forEach((flowField) => {
+          flowField.update();
+          flowField.draw(ctx);
         });
+        flowFieldes = flowFieldes.filter((flowField) => !flowField.isDie);
       };
+
       brushFunctions.click = () => {
         flowFieldes.push(new FlowFieldBrush({ ctx, mouse, canvas }));
       };

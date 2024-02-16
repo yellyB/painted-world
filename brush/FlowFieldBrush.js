@@ -7,12 +7,18 @@ export class FlowFieldBrush {
     this.canvas = canvas;
 
     this.pos = new Vector(mouse.x, mouse.y);
+    // this.pos = new Vector(
+    //   Math.floor(Math.random() * this.canvas.width),
+    //   Math.floor(Math.random() * this.canvas.height)
+    // );
 
     this.angle = 0;
     this.speed = new Vector(1, 1);
     this.velocity = Math.floor(Math.random() * 3 + 1);
     this.trajectories = [this.pos]; // 궤적
     this.maxLenOfTrajectory = Math.floor(Math.random() * 100 + 20); // 20~100
+    this.timer = Math.floor(Math.random() * 100 + 40);
+    this.isDie = false;
 
     // flow field
     this.cellSize = 20;
@@ -37,6 +43,13 @@ export class FlowFieldBrush {
     }
   }
   update() {
+    this.timer--;
+
+    if (this.timer < 1) {
+      this.isDie = true;
+      return;
+    }
+
     let currRowIndex = Math.floor(this.pos.y / this.cellSize);
     let currColIndex = Math.floor(this.pos.x / this.cellSize);
 
@@ -66,5 +79,23 @@ export class FlowFieldBrush {
       ctx.lineTo(trajectory.x, trajectory.y)
     );
     ctx.stroke();
+  }
+  turnOnDebug(ctx) {
+    ctx.save();
+    ctx.strokeStyle = "cyan";
+    ctx.lineWidth = 0.3;
+    for (let row = 0; row < this.rows; row++) {
+      ctx.beginPath();
+      ctx.moveTo(0, this.cellSize * row);
+      ctx.lineTo(this.canvas.width, this.cellSize * row);
+      ctx.stroke();
+    }
+    for (let col = 0; col < this.cols; col++) {
+      ctx.beginPath();
+      ctx.moveTo(this.cellSize * col, 0);
+      ctx.lineTo(this.cellSize * col, this.canvas.height);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 }
