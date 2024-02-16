@@ -13,7 +13,7 @@ const ctx = canvas.getContext("2d");
 
 const moistureLevelElement = document.querySelector(".moistureLevel");
 const brushSizeElement = document.querySelector(".brushSize");
-const tichknessElement = document.querySelector(".tichkness");
+const thicknessElement = document.querySelector(".thickness");
 const jiggleVolumnElement = document.querySelector(".jiggleVolumn");
 const zoomElement = document.querySelector(".zoom");
 
@@ -172,7 +172,7 @@ const buildBrushFunctions = () => {
           mouse,
           canvas,
           hue: hueCicle,
-          tichkness: Number(tichknessElement.value),
+          thickness: Number(thicknessElement.value),
           jiggleVolumn: Number(jiggleVolumnElement.value),
           zoom: Number(zoomElement.value),
         };

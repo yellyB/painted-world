@@ -1,7 +1,7 @@
 import { Vector } from "./Vector.js";
 
 export class FlowFieldBrush {
-  constructor({ ctx, mouse, canvas, hue, tichkness, jiggleVolumn, zoom }) {
+  constructor({ ctx, mouse, canvas, hue, thickness, jiggleVolumn, zoom }) {
     this.ctx = ctx;
     this.mouse = mouse;
     this.canvas = canvas;
@@ -22,7 +22,7 @@ export class FlowFieldBrush {
     this.vital = this.initVital;
     this.isDie = false;
 
-    this.tichkness = Math.abs(tichkness);
+    this.thickness = Math.abs(thickness);
     this.colorLevel = Math.floor(Math.random() * 100 + 60);
 
     // flow field
@@ -77,11 +77,11 @@ export class FlowFieldBrush {
     ctx.save()
     ctx.fillStyle = `hsl(${this.color},100%,${this.colorLevel}%)`;
     ctx.strokeStyle = `hsl(${this.color},100%,${this.colorLevel}%)`;
-    ctx.lineWidth = this.tichkness;
+    ctx.lineWidth = this.thickness;
     ctx.globalAlpha = this.vital / this.initVital + 0.3;
 
     ctx.beginPath();
-    ctx.arc(this.pos.x, this.pos.y, this.tichkness / 2, 0, Math.PI * 2);
+    ctx.arc(this.pos.x, this.pos.y, this.thickness / 2, 0, Math.PI * 2);
     ctx.fill();
 
     ctx.beginPath();
