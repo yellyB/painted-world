@@ -44,7 +44,7 @@ const selectedColor = {
 
 let waterColorCircles = [];
 const bugBrushes = [];
-const milkyWays = [];
+const milkyWayBrush = new MilkyWayBrush();
 let waterDrops = [];
 let flowFieldes = [];
 
@@ -155,11 +155,11 @@ const buildBrushFunctions = () => {
 
     case brushType.MilkyWayBrush:
       brushFunctions.animate = () => {
-        milkyWays.forEach((i) => i.update());
-        milkyWays.forEach((i) => i.draw(ctx));
+        milkyWayBrush.update();
+        milkyWayBrush.draw({canvas, ctx});
       };
       brushFunctions.drag = () => {
-        milkyWays.push(new MilkyWayBrush({ x: mouse.x, y: mouse.y }));
+        milkyWayBrush.add({ x: mouse.x, y: mouse.y });
       };
       break;
 
