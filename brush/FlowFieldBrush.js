@@ -77,6 +77,7 @@ export class FlowFieldBrush {
     }
   }
   draw(ctx) {
+    ctx.save()
     ctx.fillStyle = `hsl(${this.color},100%,${this.colorLevel}%)`;
     ctx.strokeStyle = `hsl(${this.color},100%,${this.colorLevel}%)`;
     ctx.lineWidth = this.tichkness;
@@ -92,6 +93,7 @@ export class FlowFieldBrush {
       ctx.lineTo(trajectory.x, trajectory.y)
     );
     ctx.stroke();
+    ctx.restore()
   }
   turnOnDebug(ctx) {
     ctx.save();
