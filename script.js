@@ -4,6 +4,7 @@ import {
   BugBrush,
   MilkyWayBrush,
   FlowFieldBrush,
+  FlowField,
 } from "./brush/index.js";
 import { rgbToHsl, hexToRgb, clearCanvas } from "./utils.js";
 import { brushType } from "./type.js";
@@ -47,6 +48,15 @@ const bugBrushes = [];
 const milkyWayBrush = new MilkyWayBrush();
 let waterDrops = [];
 let flowFieldes = [];
+const flowField = new FlowField({
+  ctx,
+  mouse,
+  canvas,
+  hue: 0,
+  thickness: Number(thicknessElement.value),
+  jiggleVolumn: Number(jiggleVolumnElement.value),
+  zoom: Number(zoomElement.value),
+});
 
 const brushFunctions = {};
 
@@ -156,7 +166,7 @@ const buildBrushFunctions = () => {
     case brushType.MilkyWayBrush:
       brushFunctions.animate = () => {
         milkyWayBrush.update();
-        milkyWayBrush.draw({canvas, ctx});
+        milkyWayBrush.draw({ canvas, ctx });
       };
       brushFunctions.drag = () => {
         milkyWayBrush.add({ x: mouse.x, y: mouse.y });
@@ -175,8 +185,9 @@ const buildBrushFunctions = () => {
           thickness: Number(thicknessElement.value),
           jiggleVolumn: Number(jiggleVolumnElement.value),
           zoom: Number(zoomElement.value),
+          flowField,
         };
-        // new FlowFieldBrush(params).turnOnDebug(ctx);
+        // flowField.turnOnDebug(ctx);
         flowFieldes.forEach((flowField) => {
           flowField.update();
           flowField.draw(ctx);

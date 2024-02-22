@@ -1,7 +1,16 @@
 import { Vector } from "./Vector.js";
 
 export class FlowFieldBrush {
-  constructor({ ctx, mouse, canvas, hue, thickness, jiggleVolumn, zoom }) {
+  constructor({
+    ctx,
+    mouse,
+    canvas,
+    hue,
+    thickness,
+    jiggleVolumn,
+    zoom,
+    flowField,
+  }) {
     this.ctx = ctx;
     this.mouse = mouse;
     this.canvas = canvas;
@@ -25,28 +34,8 @@ export class FlowFieldBrush {
     this.thickness = Math.abs(thickness);
     this.colorLevel = Math.floor(Math.random() * 100 + 60);
 
-    // flow field
-    this.cellSize = 20;
-    this.rows;
-    this.cols;
-    this.flowField = [];
-    this.jiggleVolumn = jiggleVolumn;
-    this.zoom = zoom;
-    this.generateFlowField();
-  }
-  generateFlowField() {
-    this.rows = Math.floor(this.canvas.height / this.cellSize);
-    this.cols = Math.floor(this.canvas.width / this.cellSize);
-
-    for (let row = 0; row < this.rows; row++) {
-      this.flowField.push([]);
-      for (let col = 0; col < this.cols; col++) {
-        const angle =
-          (Math.sin(row * this.zoom) + Math.cos(col * this.zoom)) *
-          this.jiggleVolumn;
-        this.flowField[row].push(angle);
-      }
-    }
+    this.flowField = flowField.get();
+    this.cellSize = flowField.getCellSize();
   }
   update() {
     this.vital--;
@@ -66,7 +55,10 @@ export class FlowFieldBrush {
       return;
     }
 
-    this.velocity = new Vector(Math.cos(this.angle), Math.sin(this.angle)).multiply(this.speed);
+    this.velocity = new Vector(
+      Math.cos(this.angle),
+      Math.sin(this.angle)
+    ).multiply(this.speed);
     this.pos = this.pos.add(this.velocity);
     this.trajectories.push(this.pos);
     if (this.trajectories.length > this.maxLenOfTrajectory) {
@@ -74,7 +66,7 @@ export class FlowFieldBrush {
     }
   }
   draw(ctx) {
-    ctx.save()
+    ctx.save();
     ctx.fillStyle = `hsl(${this.color},100%,${this.colorLevel}%)`;
     ctx.strokeStyle = `hsl(${this.color},100%,${this.colorLevel}%)`;
     ctx.lineWidth = this.thickness;
@@ -90,24 +82,6 @@ export class FlowFieldBrush {
       ctx.lineTo(trajectory.x, trajectory.y)
     );
     ctx.stroke();
-    ctx.restore()
-  }
-  turnOnDebug(ctx) {
-    ctx.save();
-    ctx.strokeStyle = "cyan";
-    ctx.lineWidth = 0.3;
-    for (let row = 0; row < this.rows; row++) {
-      ctx.beginPath();
-      ctx.moveTo(0, this.cellSize * row);
-      ctx.lineTo(this.canvas.width, this.cellSize * row);
-      ctx.stroke();
-    }
-    for (let col = 0; col < this.cols; col++) {
-      ctx.beginPath();
-      ctx.moveTo(this.cellSize * col, 0);
-      ctx.lineTo(this.cellSize * col, this.canvas.height);
-      ctx.stroke();
-    }
     ctx.restore();
   }
 }
