@@ -1,6 +1,26 @@
 import { Vector } from "./Vector.js";
 
 export class MilkyWayBrush {
+  constructor() {
+    this.brushes = [];
+  }
+
+  add({ x, y }) {
+    this.brushes.push(new Brush({ x, y }));
+  }
+
+  update() {
+    this.brushes.forEach(brush => brush.update());
+  }
+
+  draw({ctx, canvas}) {
+    ctx.fillStyle = `hsl(0, 0%, 35%)`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    this.brushes.forEach(brush => brush.draw(ctx));
+  }
+}
+
+class Brush {
   constructor({ x, y }) {
     this.age = 0;
     // 우주
@@ -9,18 +29,11 @@ export class MilkyWayBrush {
       .rotate(Math.random() * Math.PI * 2)
       .scale(this.posDistance)
       .add(new Vector(x, y));
-    this.radius = Math.random() * 10 + 50;
-    this.bgColor = 200;
-    this.bgSaturation = 70;
-    const bgLightnessMin = 4;
-    const bgLightnessMax = 6;
-    this.bgLightness =
-      Math.random() * (bgLightnessMax - bgLightnessMin) + bgLightnessMin;
-    this.bgOpacity = 0;
+    this.radius = Math.random() * 10 + 30;
     // 별
     this.starSpeed = 0.05;
     this.starRadius = 0.7;
-    this.starCount = Math.floor(Math.random() * 3 + 5);
+    this.starCount = Math.floor(Math.random() * 2 + 3);
     this.stars = Array.from({ length: this.starCount }, () =>
       this.createStar()
     );
@@ -30,8 +43,6 @@ export class MilkyWayBrush {
     }
   }
   update() {
-    // 배경은 처음엔 가파르게, 갈수록 완만하게 선명해진다.
-    this.bgOpacity = Math.min(1, Math.log2(this.age + 1) / 5);
     // 별 이동
     this.stars.forEach((star) => {
       star.pos = star.pos.add(star.velocity);
@@ -43,18 +54,6 @@ export class MilkyWayBrush {
     this.age += 1;
   }
   draw(ctx) {
-    this.drawBackground(ctx);
-    this.drawStars(ctx);
-  }
-  drawBackground(ctx) {
-    ctx.save();
-    ctx.fillStyle = `hsla(${this.bgColor},${this.bgSaturation}%,${this.bgLightness}%,${this.bgOpacity})`;
-    ctx.beginPath();
-    ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-  drawStars(ctx) {
     ctx.save();
     this.stars.forEach((star) => {
       ctx.fillStyle = star.color;
