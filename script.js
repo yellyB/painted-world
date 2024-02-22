@@ -20,6 +20,7 @@ const zoomElement = document.querySelector(".zoom");
 
 const colorPicker = document.getElementById("colorPicker");
 const brushSelector = document.getElementById("brushSelector");
+const flowFieldDebugCheckbox = document.getElementById("flow_field_debug");
 
 const waterColorControllerDiv = document.querySelector(
   ".water-color-controller"
@@ -31,6 +32,7 @@ canvas.height = window.innerHeight;
 
 let isDragging = false;
 let selectedBrushType = brushSelector.value;
+let isDebugMode = false;
 
 const mouse = {
   x: undefined,
@@ -47,16 +49,6 @@ let waterColorCircles = [];
 const bugBrushes = [];
 const milkyWayBrush = new MilkyWayBrush();
 let waterDrops = [];
-let flowFieldes = [];
-const flowField = new FlowField({
-  ctx,
-  mouse,
-  canvas,
-  hue: 0,
-  thickness: Number(thicknessElement.value),
-  jiggleVolumn: Number(jiggleVolumnElement.value),
-  zoom: Number(zoomElement.value),
-});
 
 const brushFunctions = {};
 
@@ -174,34 +166,35 @@ const buildBrushFunctions = () => {
       break;
 
     case brushType.FlowFieldBrush:
+      const flowField = new FlowField({
+        canvas,
+        jiggleVolumn: Number(jiggleVolumnElement.value),
+        zoom: Number(zoomElement.value),
+      });
+      const flowFieldBrush = new FlowFieldBrush({
+        ctx,
+        mouse,
+        canvas,
+        thickness: Number(thicknessElement.value),
+        flowField,
+      });
       let hueCicle = 0;
-      let params = {};
+
       brushFunctions.animate = () => {
-        params = {
-          ctx,
-          mouse,
-          canvas,
-          hue: hueCicle,
-          thickness: Number(thicknessElement.value),
-          jiggleVolumn: Number(jiggleVolumnElement.value),
-          zoom: Number(zoomElement.value),
-          flowField,
-        };
-        // flowField.turnOnDebug(ctx);
-        flowFieldes.forEach((flowField) => {
-          flowField.update();
-          flowField.draw(ctx);
-        });
-        flowFieldes = flowFieldes.filter((flowField) => !flowField.isDie);
+        flowFieldBrush.update();
+        flowFieldBrush.draw(ctx);
+        flowFieldBrush.filter();
+
+        if (isDebugMode) flowField.turnOnDebug(ctx);
       };
       brushFunctions.click = () => {
-        flowFieldes.push(new FlowFieldBrush(params));
+        flowFieldBrush.add({ color: hueCicle });
       };
       brushFunctions.drag = () => {
-        const brushVoulumn = 30;
         hueCicle++;
+        const brushVoulumn = 30;
         for (let i = 0; i < brushVoulumn; i++) {
-          flowFieldes.push(new FlowFieldBrush(params));
+          flowFieldBrush.add({ color: hueCicle });
         }
       };
       break;
@@ -287,6 +280,10 @@ colorPicker.addEventListener("change", () => updateColor());
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+});
+
+flowFieldDebugCheckbox.addEventListener("change", (e) => {
+  isDebugMode = e.target.checked;
 });
 
 animate();

@@ -1,20 +1,10 @@
 import { Vector } from "./Vector.js";
 
-export class FlowFieldBrush {
-  constructor({
-    ctx,
-    mouse,
-    canvas,
-    hue,
-    thickness,
-    jiggleVolumn,
-    zoom,
-    flowField,
-  }) {
-    this.ctx = ctx;
+class Brush {
+  constructor({ mouse, canvas, color, thickness, flowField }) {
     this.mouse = mouse;
     this.canvas = canvas;
-    this.color = hue;
+    this.color = color;
 
     const gap = 20;
     this.pos = new Vector(
@@ -83,5 +73,36 @@ export class FlowFieldBrush {
     );
     ctx.stroke();
     ctx.restore();
+  }
+}
+
+export class FlowFieldBrush {
+  constructor({ ctx, mouse, canvas, thickness, flowField }) {
+    this.ctx = ctx;
+    this.mouse = mouse;
+    this.canvas = canvas;
+    this.thickness = Math.abs(thickness);
+    this.flowField = flowField;
+    this.brushes = [];
+  }
+  add({ color }) {
+    this.brushes.push(
+      new Brush({
+        mouse: this.mouse,
+        canvas: this.canvas,
+        color,
+        thickness: this.thickness,
+        flowField: this.flowField,
+      })
+    );
+  }
+  filter() {
+    this.brushes = this.brushes.filter((flowField) => !flowField.isDie);
+  }
+  update() {
+    this.brushes.forEach((brush) => brush.update());
+  }
+  draw(ctx) {
+    this.brushes.forEach((brush) => brush.draw(ctx));
   }
 }

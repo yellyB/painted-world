@@ -1,8 +1,7 @@
 import { Vector } from "./Vector.js";
 
 export class FlowField {
-  constructor({ ctx, mouse, canvas, hue, thickness, jiggleVolumn, zoom }) {
-    this.ctx = ctx;
+  constructor({ canvas, jiggleVolumn, zoom }) {
     this.canvas = canvas;
 
     this.cellSize = 20;
