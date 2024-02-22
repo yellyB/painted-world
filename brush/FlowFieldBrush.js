@@ -13,14 +13,14 @@ export class FlowFieldBrush {
       mouse.y + Math.floor(Math.random() * (gap * 2) - gap)
     );
     this.angle = 0;
-    this.speed = new Vector(1, 1);
-    this.velocity = Math.floor(Math.random() * 4 + 1);
+    const direction = Math.random() > 0.5 ? 1 : -1;
+    this.speed = Math.floor(Math.random() * 4 + 1) * direction;
+    this.velocity = new Vector(0, 0);
     this.trajectories = [this.pos]; // 궤적
     this.maxLenOfTrajectory = Math.floor(Math.random() * 100 + 20); // 20~100
     this.initVital = Math.floor(Math.random() * 100 + 40);
     this.vital = this.initVital;
     this.isDie = false;
-    this.vectorMethod = ["add", "subtract"][Math.floor(Math.random() * 2)];
 
     this.tichkness = Math.abs(tichkness);
     this.colorLevel = Math.floor(Math.random() * 100 + 60);
@@ -66,11 +66,8 @@ export class FlowFieldBrush {
       return;
     }
 
-    const newSpeed = new Vector(
-      Math.cos(this.angle) * this.velocity,
-      Math.sin(this.angle) * this.velocity
-    );
-    this.pos = this.pos[this.vectorMethod](newSpeed);
+    this.velocity = new Vector(Math.cos(this.angle), Math.sin(this.angle)).multiply(this.speed);
+    this.pos = this.pos.add(this.velocity);
     this.trajectories.push(this.pos);
     if (this.trajectories.length > this.maxLenOfTrajectory) {
       this.trajectories = this.trajectories.slice(1);
